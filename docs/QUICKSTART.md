@@ -6,7 +6,7 @@
 - Docker & Docker Compose
 - PostgreSQL 15+
 - Redis 7+
-- pnpm (recommended) or npm
+- npm (pnpm optional)
 
 ## Installation
 
@@ -14,7 +14,7 @@
 
 ```bash
 cd assistant.bd
-pnpm install
+npm install
 ```
 
 ### 2. Environment Setup
@@ -43,7 +43,7 @@ STRIPE_SECRET_KEY=sk_...
 ### 4. Start Infrastructure
 
 ```bash
-docker-compose up -d
+docker compose up -d   # or docker-compose up -d
 ```
 
 Verifies:
@@ -55,21 +55,21 @@ Verifies:
 
 ```bash
 # Terminal 1: API Gateway
-pnpm --filter=@assistant.bd/api-gateway dev
+npm run -w @assistant.bd/api-gateway dev
 
 # Terminal 2: Workflow Engine
-pnpm --filter=@assistant.bd/workflow-engine dev
+npm run -w @assistant.bd/workflow-engine dev
 
 # Terminal 3: AI Orchestrator
-pnpm --filter=@assistant.bd/ai-orchestrator dev
+npm run -w @assistant.bd/ai-orchestrator dev
 
 # Terminal 4: Web Dashboard
-pnpm --filter=@assistant.bd/web dev
+npm run -w @assistant.bd/web dev
 ```
 
 Or run all at once:
 ```bash
-pnpm run dev
+npm run dev
 ```
 
 ### 6. Access Applications
@@ -84,33 +84,33 @@ pnpm run dev
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Start all services
-pnpm run dev
+npm run dev
 
 # Build all services
-pnpm run build
+npm run build
 
 # Run tests
-pnpm run test
+npm run test
 
 # Lint & format
-pnpm run lint
-pnpm run format
+npm run lint
+npm run format
 ```
 
 ### Working with Specific Services
 
 ```bash
 # Run specific service
-pnpm --filter=@assistant.bd/api-gateway dev
+npm run -w @assistant.bd/api-gateway dev
 
 # Build specific service
-pnpm --filter=@assistant.bd/api-gateway build
+npm run -w @assistant.bd/api-gateway build
 
 # Test specific service
-pnpm --filter=@assistant.bd/api-gateway test
+npm run -w @assistant.bd/api-gateway test
 ```
 
 ### Database
@@ -127,16 +127,16 @@ redis-cli -p 6379
 
 ```bash
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Rebuild images
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # Stop all
-docker-compose down
+docker compose down
 
 # Remove everything (careful!)
-docker-compose down -v
+docker compose down -v
 ```
 
 ## Project Structure
@@ -181,13 +181,13 @@ kill -9 <PID>
 
 ```bash
 # Verify PostgreSQL is running
-docker-compose ps
+docker compose ps
 
 # Check connection
 psql postgresql://admin:secure_password@localhost:5432/assistant_bd
 
 # View logs
-docker-compose logs postgres
+docker compose logs postgres
 ```
 
 ### Redis Connection Error
@@ -197,20 +197,20 @@ docker-compose logs postgres
 redis-cli -p 6379 ping
 
 # View logs
-docker-compose logs redis
+docker compose logs redis
 ```
 
 ### Build Errors
 
 ```bash
 # Clean everything
-pnpm run clean
+npm run clean
 
 # Reinstall
-pnpm install
+npm install
 
 # Rebuild
-pnpm run build
+npm run build
 ```
 
 ## Next Steps

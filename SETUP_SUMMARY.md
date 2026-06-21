@@ -4,7 +4,7 @@
 
 Your production-ready AI Operating System monorepo is now set up at:
 ```
-/Users/sojib/Downloads/assistant.bd/
+assistant.bd/
 ```
 
 ### Directory Structure
@@ -84,8 +84,8 @@ assistant.bd/
 
 ### 1. Install Dependencies
 ```bash
-cd /Users/sojib/Downloads/assistant.bd
-pnpm install    # or npm install
+cd /path/to/assistant.bd
+npm install
 ```
 
 ### 2. Setup Development Environment
@@ -112,21 +112,21 @@ STRIPE_SECRET_KEY=sk_...
 
 ### 4. Start Infrastructure
 ```bash
-docker-compose up -d
+docker compose up -d   # or docker-compose up -d
 
 # Verify:
-docker-compose ps
+docker compose ps      # or docker-compose ps
 ```
 
 ### 5. Run All Services
 ```bash
 # Option A: Run all at once (easy)
-pnpm run dev
+npm run dev
 
 # Option B: Run individually (better debugging)
-pnpm --filter=@assistant.bd/api-gateway dev
-pnpm --filter=@assistant.bd/workflow-engine dev
-pnpm --filter=@assistant.bd/web dev
+npm run -w @assistant.bd/api-gateway dev
+npm run -w @assistant.bd/workflow-engine dev
+npm run -w @assistant.bd/web dev
 ```
 
 ### 6. Verify Setup
@@ -153,7 +153,7 @@ open http://localhost:3000
 ### 🔧 Infrastructure Ready
 - Docker Compose (6 services)
 - Turbo for build optimization
-- pnpm for fast installs
+- npm for installs (pnpm optional)
 - Production deployment scripts
 
 ### 📚 Full Documentation
@@ -188,11 +188,11 @@ open http://localhost:3000
 
 ```bash
 # Clean & reinstall
-pnpm run clean
-pnpm install
+npm run clean
+npm install
 
 # View Docker logs
-docker-compose logs -f
+docker compose logs -f   # or docker-compose logs -f
 
 # Database access
 psql postgresql://admin:secure_password@localhost:5432/assistant_bd
@@ -204,10 +204,10 @@ psql postgresql://admin:secure_password@localhost:5432/assistant_bd
 
 **Start with:**
 ```bash
-cd /Users/sojib/Downloads/assistant.bd
-pnpm install && ./scripts/dev-setup.sh
-docker-compose up -d
-pnpm run dev
+cd /path/to/assistant.bd
+npm install && ./scripts/dev-setup.sh
+docker compose up -d   # or docker-compose up -d
+npm run dev
 ```
 
 **Then visit:** http://localhost:3000 🚀

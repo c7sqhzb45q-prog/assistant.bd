@@ -4,6 +4,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
+import { BillingModule } from './modules/billing/billing.module';
 import { HealthController } from './controllers/health.controller';
 
 @Module({
@@ -16,6 +17,7 @@ import { HealthController } from './controllers/health.controller';
     WorkflowModule,
     AgentModule,
     ConversationModule,
+    BillingModule,
   ],
   controllers: [HealthController],
 })

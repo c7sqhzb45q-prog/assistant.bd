@@ -83,10 +83,11 @@ export class WorkflowExecutor {
         actionsExecuted,
       };
     } catch (error) {
-      console.error(`[Workflow] Execution failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[Workflow] Execution failed: ${message}`);
       return {
         success: false,
-        error: error.message,
+        error: message,
         duration: Date.now() - startTime,
         actionsExecuted: 0,
       };

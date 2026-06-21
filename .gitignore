@@ -20,6 +20,7 @@ yarn.lock
 .idea/
 *.swp
 *.swo
+*.swn
 *~
 .DS_Store
 

@@ -9,10 +9,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@assistant.bd/*": ["../../packages/*", "../../services/*"]
-    },
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

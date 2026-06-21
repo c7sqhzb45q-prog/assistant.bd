@@ -198,8 +198,8 @@ custom-agent-runtime/ → User-created agents
 
 ### Development
 ```bash
-docker-compose up
-pnpm run dev
+docker compose up -d
+npm run dev
 # All services in one environment
 ```
 
@@ -209,24 +209,24 @@ pnpm run dev
 kubectl apply -f infra/kubernetes/
 
 # Environment-specific configs
-ENVIRONMENT=production pnpm run deploy
+ENVIRONMENT=production npm run deploy
 ```
 
 ## Testing Strategy
 
 ### Unit Tests
 ```bash
-pnpm run test
+npm run test
 ```
 
 ### Integration Tests
 ```bash
-pnpm run test:integration
+npm run test:integration
 ```
 
 ### E2E Tests (Workflow execution)
 ```bash
-pnpm run test:e2e
+npm run test:e2e
 ```
 
 ## Monitoring & Observability

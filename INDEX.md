@@ -28,7 +28,7 @@ Welcome to **assistant.bd** — Your production-grade AI Operating System monore
 - **package.json** — Root monorepo configuration
 - **turbo.json** — Build system configuration
 - **tsconfig.json** — TypeScript configuration
-- **docker-compose.yml** — Local development infrastructure
+- **docker-compose.yml** — Local development infrastructure (Postgres/Redis)
 
 ---
 
@@ -90,27 +90,27 @@ Welcome to **assistant.bd** — Your production-grade AI Operating System monore
 
 ### Setup
 ```bash
-cd /Users/sojib/Downloads/assistant.bd
-pnpm install
+cd /path/to/assistant.bd
+npm install
 ./scripts/dev-setup.sh
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Development
 ```bash
 # Run all services
-pnpm run dev
+npm run dev
 
 # Run specific service
-pnpm --filter=@assistant.bd/api-gateway dev
-pnpm --filter=@assistant.bd/web dev
+npm run -w @assistant.bd/api-gateway dev
+npm run -w @assistant.bd/web dev
 
 # Build everything
-pnpm run build
+npm run build
 
 # Test & lint
-pnpm run test
-pnpm run lint
+npm run test
+npm run lint
 ```
 
 ### Database
@@ -125,10 +125,10 @@ redis-cli -p 6379
 ### Docker
 ```bash
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
 # Stop all
-docker-compose down
+docker compose down
 ```
 
 ---
@@ -139,7 +139,7 @@ docker-compose down
 - **`.gitignore`** — Git ignore rules
 - **`package.json`** — Root package configuration
 - **`turbo.json`** — Turbo build system config
-- **`docker-compose.yml`** — Local development stack
+- **`docker-compose.yml`** — Local development stack (infra by default)
 
 ---
 
@@ -183,11 +183,11 @@ docker-compose down
 git checkout -b feature/my-feature
 
 # Make changes across services
-pnpm --filter=@assistant.bd/api-gateway dev
+npm run -w @assistant.bd/api-gateway dev
 # ... code ...
 
 # Test
-pnpm run test
+npm run test
 
 # Commit
 git add .
@@ -225,15 +225,15 @@ lsof -i :3000
 
 ### Database Connection Error
 ```bash
-docker-compose logs postgres
-docker-compose ps  # Check if running
+docker compose logs postgres
+docker compose ps  # Check if running
 ```
 
 ### Build Failures
 ```bash
-pnpm run clean
-pnpm install
-pnpm run build
+npm run clean
+npm install
+npm run build
 ```
 
 ---

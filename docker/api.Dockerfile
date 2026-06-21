@@ -3,23 +3,21 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy monorepo files
-COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy source code
-COPY services/api-gateway ./services/api-gateway
+# Copy workspace files first (for better layer caching)
+COPY package.json package-lock.json turbo.json ./
+COPY services ./services
 COPY packages ./packages
+COPY apps ./apps
+COPY agents ./agents
+COPY workflows ./workflows
 
-# Build
+# Install dependencies (workspace-aware)
+RUN npm ci --no-audit --no-fund
+
+# Build API
 WORKDIR /app/services/api-gateway
-RUN pnpm run build
+RUN npm run build
 
 EXPOSE 3001
 
-CMD ["pnpm", "start"]
+CMD ["npm", "run", "start"]
