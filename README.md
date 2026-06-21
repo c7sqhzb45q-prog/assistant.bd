@@ -240,10 +240,12 @@ See `/docs` for:
 
 ## 📞 Support
 
+- **Maintainer**: Sojib Ahmmed — Marketsync Global Ltd
+- **Website**: https://sojibahmmed.com
+- **Email**: mail@sojibahmmed.com
+- **Phone**: +8801410913079
 - **Docs**: https://docs.assistant.bd
 - **Status**: https://status.assistant.bd
-- **Email**: hello@assistant.bd
-- **WhatsApp**: +880 1...
 
 ---
 

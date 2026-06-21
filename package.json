@@ -6,6 +6,12 @@
     "type": "git",
     "url": "https://github.com/c7sqhzb45q-prog/assistant.bd.git"
   },
+  "author": {
+    "name": "Sojib Ahmmed",
+    "url": "https://sojibahmmed.com",
+    "email": "mail@sojibahmmed.com"
+  },
+  "homepage": "https://assistant.bd",
   "private": true,
   "type": "module",
   "workspaces": [
