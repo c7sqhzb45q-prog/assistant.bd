@@ -1,0 +1,7 @@
+{
+  "name": "@assistant.bd/crm-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "crm-service service scaffold",
+  "main": "src/index.ts"
+}

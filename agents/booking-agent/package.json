@@ -1,0 +1,7 @@
+{
+  "name": "@assistant.bd/booking-agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "booking-agent agent scaffold",
+  "main": "src/index.ts"
+}
