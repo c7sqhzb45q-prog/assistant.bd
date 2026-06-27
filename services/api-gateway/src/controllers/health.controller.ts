@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 const payloadSchema = {
@@ -33,4 +33,15 @@ export class HealthController {
       service: 'api-gateway',
     };
   }
+
+  @Get('metrics')
+  @Header('Content-Type', 'text/plain; version=0.0.4')
+  metrics() {
+    return `# HELP assistant_bd_service_up Service health status
+# TYPE assistant_bd_service_up gauge
+assistant_bd_service_up{service="api-gateway"} 1
+`;
+  }
+
 }
+

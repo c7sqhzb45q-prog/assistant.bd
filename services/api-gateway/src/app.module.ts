@@ -16,8 +16,16 @@ import { HealthController } from './controllers/health.controller';
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
         PORT: Joi.number().port().default(3001),
-        DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
-        REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),
+        DATABASE_URL: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
+          otherwise: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).optional(),
+        }),
+        REDIS_URL: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),
+          otherwise: Joi.string().uri({ scheme: ['redis', 'rediss'] }).optional(),
+        }),
         JWT_SECRET: Joi.when('NODE_ENV', {
           is: 'production',
           then: Joi.string().min(32).required(),

@@ -7,16 +7,16 @@ rule_files:
 
 scrape_configs:
   - job_name: api-gateway
-    metrics_path: /health
+    metrics_path: /metrics
     static_configs:
       - targets: ['api-gateway:3001']
 
   - job_name: workflow-engine
-    metrics_path: /health
+    metrics_path: /metrics
     static_configs:
       - targets: ['workflow-engine:3002']
 
   - job_name: ai-orchestrator
-    metrics_path: /health
+    metrics_path: /metrics
     static_configs:
       - targets: ['ai-orchestrator:3003']

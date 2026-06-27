@@ -96,6 +96,17 @@ function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean)
     return;
   }
 
+
+  if (req.url === '/metrics') {
+    res.writeHead(200, { 'content-type': 'text/plain; version=0.0.4' });
+    res.end(
+      '# HELP assistant_bd_service_up Service health status\n' +
+        '# TYPE assistant_bd_service_up gauge\n' +
+        'assistant_bd_service_up{service="ai-orchestrator"} 1\n',
+    );
+    return;
+  }
+
   if (req.url === '/ready') {
     res.writeHead(ready ? 200 : 503, { 'content-type': 'application/json' });
     res.end(
