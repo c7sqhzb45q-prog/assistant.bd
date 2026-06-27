@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -35,3 +35,22 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Run build
+        run: npm run build
+
+      - name: Dependency policy check (critical vulnerabilities)
+        run: npm audit --audit-level=critical
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

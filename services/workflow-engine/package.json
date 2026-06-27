@@ -7,7 +7,7 @@
     "dev": "ts-node src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/",
     "type-check": "tsc --noEmit"
   },

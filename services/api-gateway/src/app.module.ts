@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import Joi from 'joi';
 import { AuthModule } from './modules/auth/auth.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { AgentModule } from './modules/agent/agent.module';
@@ -11,7 +12,29 @@ import { HealthController } from './controllers/health.controller';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'production' ? undefined : '.env',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+        PORT: Joi.number().port().default(3001),
+        DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
+        REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),
+        JWT_SECRET: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().min(32).required(),
+          otherwise: Joi.string().min(16).required(),
+        }),
+        FRONTEND_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
+        CORS_ORIGIN: Joi.string().optional(),
+        STRIPE_SECRET_KEY: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().pattern(/^sk_/).required(),
+          otherwise: Joi.string().optional(),
+        }),
+      }),
+      validationOptions: {
+        abortEarly: false,
+        allowUnknown: true,
+      },
     }),
     AuthModule,
     WorkflowModule,

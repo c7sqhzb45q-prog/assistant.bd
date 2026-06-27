@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - assistant_network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - assistant_network
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL?REDIS_URL is required}
+      JWT_SECRET: ${JWT_SECRET?JWT_SECRET is required}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY?STRIPE_SECRET_KEY is required}
+      FRONTEND_URL: ${FRONTEND_URL?FRONTEND_URL is required}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - assistant_network
+
+  workflow-engine:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+      args:
+        SERVICE_NAME: workflow-engine
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: ${DATABASE_URL?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL?REDIS_URL is required}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - assistant_network
+
+  ai-orchestrator:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+      args:
+        SERVICE_NAME: ai-orchestrator
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      DATABASE_URL: ${DATABASE_URL?DATABASE_URL is required}
+      REDIS_URL: ${REDIS_URL?REDIS_URL is required}
+      OPENAI_API_KEY: ${OPENAI_API_KEY?OPENAI_API_KEY is required}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - assistant_network
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL?NEXT_PUBLIC_API_URL is required}
+    ports:
+      - '3000:3000'
+    depends_on:
+      - api-gateway
+    networks:
+      - assistant_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  assistant_network:
+    driver: bridge

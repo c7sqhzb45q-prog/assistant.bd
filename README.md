@@ -10,6 +10,19 @@
 
 ---
 
+## ✅ Current implementation status
+
+This repository now contains production-baseline assets for currently active components:
+
+- Active app: `apps/web`
+- Active services: `services/api-gateway`, `services/workflow-engine`, `services/ai-orchestrator`
+- Shared packages in active use: `packages/ai-core`, `packages/types`
+- Deployment assets: `docker-compose.prod.yml`, `infra/kubernetes/*`, `infra/terraform/*`, `infra/monitoring/*`
+
+Other promised modules are scaffolded as placeholders and should be treated as roadmap items until implemented.
+
+---
+
 ## 🏗️ Monorepo Structure
 
 ### 📱 **Apps** (User-facing UI layer)
@@ -235,6 +248,8 @@ See `/docs` for:
 - Agent development guide
 - Workflow creation guide
 - Deployment guide
+- Production operations: `docs/PRODUCTION_OPERATIONS.md`
+- Production release checklist: `docs/PRODUCTION_CHECKLIST.md`
 
 ---
 

@@ -1,0 +1,26 @@
+groups:
+  - name: assistant-bd-slo
+    rules:
+      - alert: ApiGatewayUnavailable
+        expr: up{job="api-gateway"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API gateway is unavailable"
+
+      - alert: WorkflowEngineUnavailable
+        expr: up{job="workflow-engine"} == 0
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "Workflow engine is unavailable"
+
+      - alert: AIOrchestratorUnavailable
+        expr: up{job="ai-orchestrator"} == 0
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "AI orchestrator is unavailable"
