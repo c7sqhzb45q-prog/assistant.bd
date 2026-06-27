@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
     "test": "jest --passWithNoTests",
-    "lint": "eslint src/",
+    "lint": "eslint --ext .ts src/",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
