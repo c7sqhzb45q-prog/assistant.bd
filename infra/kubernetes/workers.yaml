@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-engine
+  namespace: assistant-bd
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: workflow-engine
+  template:
+    metadata:
+      labels:
+        app: workflow-engine
+    spec:
+      containers:
+        - name: workflow-engine
+          image: ghcr.io/c7sqhzb45q-prog/assistant.bd/workflow-engine:latest
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: assistant-bd-config
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: assistant-bd-config
+                  key: WORKFLOW_PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assistant-bd-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assistant-bd-secrets
+                  key: REDIS_URL
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3002
+            initialDelaySeconds: 20
+            periodSeconds: 20
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-orchestrator
+  namespace: assistant-bd
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-orchestrator
+  template:
+    metadata:
+      labels:
+        app: ai-orchestrator
+    spec:
+      containers:
+        - name: ai-orchestrator
+          image: ghcr.io/c7sqhzb45q-prog/assistant.bd/ai-orchestrator:latest
+          ports:
+            - containerPort: 3003
+          envFrom:
+            - configMapRef:
+                name: assistant-bd-config
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: assistant-bd-config
+                  key: ORCHESTRATOR_PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assistant-bd-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assistant-bd-secrets
+                  key: REDIS_URL
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: assistant-bd-secrets
+                  key: OPENAI_API_KEY
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3003
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 20
+            periodSeconds: 20

@@ -10,6 +10,19 @@
 
 ---
 
+## ✅ Current implementation status
+
+This repository now contains production-baseline assets for currently active components:
+
+- Active app: `apps/web`
+- Active services: `services/api-gateway`, `services/workflow-engine`, `services/ai-orchestrator`
+- Shared packages in active use: `packages/ai-core`, `packages/types`
+- Deployment assets: `docker-compose.prod.yml`, `infra/kubernetes/*`, `infra/terraform/*`, `infra/monitoring/*`
+
+Other promised modules are scaffolded as placeholders and should be treated as roadmap items until implemented.
+
+---
+
 ## 🏗️ Monorepo Structure
 
 ### 📱 **Apps** (User-facing UI layer)
@@ -111,37 +124,18 @@ Action Executor (reply/email/call/automation)
 
 ## 🔑 Key Features
 
-### Automation Layer
-- ✅ Visual workflow builder (Zapier-style)
-- ✅ 1000+ pre-built integrations
-- ✅ Conditional logic & branching
-- ✅ Scheduled tasks & reminders
+### Implemented and production-aligned now
+- ✅ Web dashboard runtime (`apps/web`)
+- ✅ API gateway service with health/readiness endpoints (`services/api-gateway`)
+- ✅ Workflow execution service with health/readiness endpoints (`services/workflow-engine`)
+- ✅ AI orchestration service with health/readiness endpoints (`services/ai-orchestrator`)
+- ✅ Shared active libraries (`packages/ai-core`, `packages/types`)
+- ✅ Production deployment assets (`docker-compose.prod.yml`, `infra/kubernetes/*`, `infra/terraform/*`, `infra/monitoring/*`)
 
-### AI Layer
-- ✅ Multi-agent orchestration
-- ✅ Natural language understanding
-- ✅ Context-aware memory
-- ✅ Tool calling & API integration
-
-### Messaging Layer
-- ✅ WhatsApp Business API
-- ✅ Facebook Messenger
-- ✅ Instagram DMs
-- ✅ Email (SMTP/IMAP)
-- ✅ Telegram
-- ✅ SMS (Twilio)
-
-### CRM Layer
-- ✅ Customer profiles
-- ✅ Interaction history
-- ✅ Sentiment analysis
-- ✅ Vector memory (semantic search)
-
-### Billing Layer
-- ✅ Stripe integration
-- ✅ bKash/Nagad (Bangladesh)
-- ✅ Usage-based pricing
-- ✅ Team billing
+### Scaffolded / roadmap (not production-active yet)
+- ⏳ Additional apps (`apps/inbox`, `apps/builder`, `apps/workflow-canvas`, `apps/admin`, `apps/landing`)
+- ⏳ Additional backend services (auth, crm, messaging, billing, analytics, event-bus)
+- ⏳ Additional shared libraries (`packages/memory`, `packages/connectors`, `packages/queue`, `packages/logger`, `packages/utils`)
 
 ---
 
@@ -150,12 +144,12 @@ Action Executor (reply/email/call/automation)
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 14, React, TailwindCSS, Zustand |
-| Backend | NestJS, FastAPI, Node.js |
-| Database | PostgreSQL, Redis, Pinecone/Milvus (vector) |
-| AI/LLM | OpenAI, Anthropic, Ollama |
-| Message Queue | Redis, NATS |
+| Backend | NestJS, Node.js |
+| Database | PostgreSQL, Redis |
+| AI/LLM | OpenAI, Anthropic |
+| Message Queue | Redis |
 | Deployment | Docker, Kubernetes, Terraform |
-| Monitoring | Prometheus, Grafana, ELK |
+| Monitoring | Prometheus, alert rules |
 
 ---
 
@@ -235,6 +229,8 @@ See `/docs` for:
 - Agent development guide
 - Workflow creation guide
 - Deployment guide
+- Production operations: `docs/PRODUCTION_OPERATIONS.md`
+- Production release checklist: `docs/PRODUCTION_CHECKLIST.md`
 
 ---
 

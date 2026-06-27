@@ -3,7 +3,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy workspace files first (for better layer caching)
+ENV NODE_ENV=production
+
 COPY package.json package-lock.json turbo.json ./
 COPY services ./services
 COPY packages ./packages
@@ -11,12 +12,13 @@ COPY apps ./apps
 COPY agents ./agents
 COPY workflows ./workflows
 
-# Install dependencies (workspace-aware)
 RUN npm ci --no-audit --no-fund
 
-# Build API
 WORKDIR /app/services/api-gateway
 RUN npm run build
+
+RUN chown -R node:node /app
+USER node
 
 EXPOSE 3001
 

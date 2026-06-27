@@ -8,8 +8,11 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,11 +30,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint
+      - name: Run lint (active modules)
+        run: npm run lint:active
 
-      - name: Run type check
-        run: npm run type-check
+      - name: Run type check (active modules)
+        run: npm run type-check:active
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests (active modules)
+        run: npm run test:active
+
+      - name: Run build (active modules)
+        run: npm run build:active
+
+      - name: Dependency policy check (critical vulnerabilities)
+        run: npm audit --audit-level=critical
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,7 @@
  * Handles: triggers, conditions, and actions
  */
 
-import { Workflow, WorkflowDefinition, Action } from '@assistant.bd/types';
+import { Workflow, Action } from '@assistant.bd/types';
 
 export interface WorkflowContext {
   workflowId: string;
@@ -152,7 +152,7 @@ export class WorkflowExecutor {
   /**
    * Send a message (WhatsApp, Email, etc)
    */
-  private async sendMessage(config: any, context: WorkflowContext) {
+  private async sendMessage(config: any, _context: WorkflowContext) {
     console.log(`[Action] Sending message via ${config.channel}`);
     // Call messaging service
     return {
@@ -167,8 +167,8 @@ export class WorkflowExecutor {
    */
   private async callAPI(
     config: any,
-    context: WorkflowContext,
-    previousOutput: any,
+    _context: WorkflowContext,
+    _previousOutput: any,
   ) {
     console.log(`[Action] Calling API: ${config.url}`);
     // Make HTTP request
@@ -181,7 +181,7 @@ export class WorkflowExecutor {
   /**
    * Create a task/reminder
    */
-  private async createTask(config: any, context: WorkflowContext) {
+  private async createTask(config: any, _context: WorkflowContext) {
     console.log(`[Action] Creating task: ${config.title}`);
     return {
       taskId: 'task_123',
@@ -192,7 +192,7 @@ export class WorkflowExecutor {
   /**
    * Run an AI agent
    */
-  private async runAgent(config: any, context: WorkflowContext) {
+  private async runAgent(config: any, _context: WorkflowContext) {
     console.log(`[Action] Running agent: ${config.agentId}`);
     // Route to AI Orchestrator
     return {
