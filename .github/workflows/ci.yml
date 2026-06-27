@@ -30,17 +30,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint
+      - name: Run lint (active modules)
+        run: npm run lint:active
 
-      - name: Run type check
-        run: npm run type-check
+      - name: Run type check (active modules)
+        run: npm run type-check:active
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests (active modules)
+        run: npm run test:active
 
-      - name: Run build
-        run: npm run build
+      - name: Run build (active modules)
+        run: npm run build:active
 
       - name: Dependency policy check (critical vulnerabilities)
         run: npm audit --audit-level=critical

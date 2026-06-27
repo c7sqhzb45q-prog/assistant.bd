@@ -1,6 +1,6 @@
 # Production Readiness Checklist
 
-- [ ] CI green on `lint`, `type-check`, `test`, `build`
+- [ ] CI green on `lint:active`, `type-check:active`, `test:active`, `build:active`
 - [ ] Secret scan passing
 - [ ] Dependency audit check passing (critical vulnerabilities)
 - [ ] Runtime required environment variables configured for production

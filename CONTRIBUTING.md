@@ -12,3 +12,8 @@ See README.md for setup instructions
 - Keep commits atomic
 - Add tests for new features
 - Reference related issues
+- Ensure CI quality gates pass before requesting merge:
+  - `npm run lint:active`
+  - `npm run type-check:active`
+  - `npm run test:active`
+  - `npm run build:active`

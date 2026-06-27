@@ -89,14 +89,14 @@ npm install
 # Start all services
 npm run dev
 
-# Build all services
-npm run build
+# Build active production modules
+npm run build:active
 
-# Run tests
-npm run test
+# Run tests for active production modules
+npm run test:active
 
 # Lint & format
-npm run lint
+npm run lint:active
 npm run format
 ```
 

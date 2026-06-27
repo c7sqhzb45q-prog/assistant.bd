@@ -7,9 +7,19 @@
 - Kubernetes manifests: `/home/runner/work/assistant.bd/assistant.bd/infra/kubernetes`
 - Terraform runtime secret and namespace bootstrap: `/home/runner/work/assistant.bd/assistant.bd/infra/terraform`
 
+## Production-active module scope
+
+Only the following modules should be treated as production-active:
+
+- App: `apps/web`
+- Services: `services/api-gateway`, `services/workflow-engine`, `services/ai-orchestrator`
+- Shared packages: `packages/ai-core`, `packages/types`
+
+All other apps/services/packages are scaffolded roadmap components and should not be assumed production-ready.
+
 ## Promotion flow (staging -> production)
 
-1. Merge to `main` with green CI (`lint`, `type-check`, `test`, `build`, security gates).
+1. Merge to `main` with green CI (`lint:active`, `type-check:active`, `test:active`, `build:active`, security gates).
 2. Deploy to staging namespace first using the same manifests/images.
 3. Run smoke checks:
    - `/health` and `/health/ready` for API gateway.
@@ -21,7 +31,8 @@
 
 Deployment order is enforced by `/home/runner/work/assistant.bd/assistant.bd/scripts/deploy.sh`:
 
-1. quality gates (`lint`, `type-check`, `test`, `build`)
+1. quality gates (`lint:active`, `type-check:active`, `test:active`, `build:active`)
+   - one-shot command: `npm run ci:active`
 2. database migration (if `migrate` script exists)
 3. image build/push
 4. Kubernetes apply

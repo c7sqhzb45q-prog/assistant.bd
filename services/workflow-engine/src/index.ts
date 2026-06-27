@@ -27,8 +27,25 @@ function log(level: 'info' | 'error', event: string, metadata: Record<string, un
   console.log(output);
 }
 
+function parseNodeEnv(value: string | undefined): Environment['NODE_ENV'] {
+  const nodeEnv = value ?? 'development';
+  if (nodeEnv !== 'development' && nodeEnv !== 'test' && nodeEnv !== 'production') {
+    throw new Error('NODE_ENV must be one of: development, test, production');
+  }
+  return nodeEnv;
+}
+
+function isValidUrl(value: string, protocols: string[]) {
+  try {
+    const parsed = new URL(value);
+    return protocols.includes(parsed.protocol.replace(':', ''));
+  } catch {
+    return false;
+  }
+}
+
 function loadEnvironment(): Environment {
-  const nodeEnv = (process.env.NODE_ENV ?? 'development') as Environment['NODE_ENV'];
+  const nodeEnv = parseNodeEnv(process.env.NODE_ENV);
   const port = Number(process.env.PORT ?? 3002);
 
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
@@ -50,6 +67,15 @@ function loadEnvironment(): Environment {
 
   if (missingInProd.length > 0) {
     throw new Error(`Missing required environment variables for production: ${missingInProd.join(', ')}`);
+  }
+
+  if (env.NODE_ENV === 'production') {
+    if (env.DATABASE_URL && !isValidUrl(env.DATABASE_URL, ['postgres', 'postgresql'])) {
+      throw new Error('DATABASE_URL must be a valid postgres/postgresql URL');
+    }
+    if (env.REDIS_URL && !isValidUrl(env.REDIS_URL, ['redis', 'rediss'])) {
+      throw new Error('REDIS_URL must be a valid redis/rediss URL');
+    }
   }
 
   return env;
