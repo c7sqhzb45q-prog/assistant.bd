@@ -1,0 +1,7 @@
+{
+  "name": "@assistant.bd/event-bus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "event-bus service scaffold",
+  "main": "src/index.ts"
+}
