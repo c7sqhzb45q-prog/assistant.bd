@@ -9,6 +9,11 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit -p tsconfig.typecheck.json"
   },
+  "eslintConfig": {
+    "extends": [
+      "next/core-web-vitals"
+    ]
+  },
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
