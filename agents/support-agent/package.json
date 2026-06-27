@@ -1,7 +1,0 @@
-{
-  "name": "@assistant.bd/support-agent",
-  "version": "1.0.0",
-  "private": true,
-  "description": "support-agent agent scaffold",
-  "main": "src/index.ts"
-}

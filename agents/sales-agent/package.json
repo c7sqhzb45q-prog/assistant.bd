@@ -1,7 +1,0 @@
-{
-  "name": "@assistant.bd/sales-agent",
-  "version": "1.0.0",
-  "private": true,
-  "description": "sales-agent agent scaffold",
-  "main": "src/index.ts"
-}

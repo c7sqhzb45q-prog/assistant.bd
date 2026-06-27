@@ -1,8 +1,0 @@
-{
-  "name": "@assistant.bd/logger",
-  "version": "1.0.0",
-  "private": true,
-  "description": "logger package scaffold",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
-}

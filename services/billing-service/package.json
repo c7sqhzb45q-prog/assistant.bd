@@ -1,7 +1,0 @@
-{
-  "name": "@assistant.bd/billing-service",
-  "version": "1.0.0",
-  "private": true,
-  "description": "billing-service service scaffold",
-  "main": "src/index.ts"
-}
