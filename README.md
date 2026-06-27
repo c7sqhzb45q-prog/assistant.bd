@@ -163,12 +163,6 @@ Action Executor (reply/email/call/automation)
 
 We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
-## 👤 Maintainer Contact
-
-- **Name:** Sojib Ahmmed
-- **Email:** mail@sojibahmmed.com
-- **Website:** https://sojibahmmed.com
-
 This monorepo uses:
 - **Turborepo** for build optimization
 - **npm workspaces** for package management (pnpm optional)

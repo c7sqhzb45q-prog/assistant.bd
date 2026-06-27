@@ -1,7 +1,0 @@
-{
-  "name": "@assistant.bd/voice-agent",
-  "version": "1.0.0",
-  "private": true,
-  "description": "voice-agent agent scaffold",
-  "main": "src/index.ts"
-}

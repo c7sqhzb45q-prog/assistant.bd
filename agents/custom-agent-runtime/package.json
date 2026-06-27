@@ -1,7 +1,0 @@
-{
-  "name": "@assistant.bd/custom-agent-runtime",
-  "version": "1.0.0",
-  "private": true,
-  "description": "custom-agent-runtime agent scaffold",
-  "main": "src/index.ts"
-}

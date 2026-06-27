@@ -1,6 +1,0 @@
-{
-  "name": "@assistant.bd/workflows",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Workflow templates, runtime, and scheduler scaffolds"
-}

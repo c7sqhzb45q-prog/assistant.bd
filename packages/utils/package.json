@@ -1,8 +1,0 @@
-{
-  "name": "@assistant.bd/utils",
-  "version": "1.0.0",
-  "private": true,
-  "description": "utils package scaffold",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
-}

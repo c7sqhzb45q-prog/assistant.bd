@@ -1,3 +1,0 @@
-# Monitoring
-
-Monitoring stack scaffold.
