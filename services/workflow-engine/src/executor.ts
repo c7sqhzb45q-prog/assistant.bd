@@ -133,20 +133,20 @@ export class WorkflowExecutor {
           return fieldValue !== value;
         case 'greater_than':
         case '>':
-          return fieldValue > value;
+          return fieldValue != null && fieldValue > value;
         case 'less_than':
         case '<':
-          return fieldValue < value;
+          return fieldValue != null && fieldValue < value;
         case 'greater_than_or_equals':
         case '>=':
-          return fieldValue >= value;
+          return fieldValue != null && fieldValue >= value;
         case 'less_than_or_equals':
         case '<=':
-          return fieldValue <= value;
+          return fieldValue != null && fieldValue <= value;
         case 'contains':
-          return typeof fieldValue === 'string' && fieldValue.includes(value);
+          return typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.includes(value);
         case 'not_contains':
-          return typeof fieldValue === 'string' && !fieldValue.includes(value);
+          return typeof fieldValue === 'string' && typeof value === 'string' && !fieldValue.includes(value);
         case 'in':
           return Array.isArray(value) && value.includes(fieldValue);
         case 'not_in':
