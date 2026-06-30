@@ -111,16 +111,75 @@ export class WorkflowExecutor {
   }
 
   private evaluateCondition(condition: any, context: WorkflowContext): boolean {
-    // Example: { type: 'if', expression: 'data.priority === "high"' }
-    // In production, use safe evaluation (vm2, json-logic-js)
+    // Safe condition evaluation using structured comparisons
+    // Conditions use: { field, operator, value } instead of raw expressions
 
     try {
-      const fn = new Function('data', `return ${condition.expression}`);
-      return fn(context.data);
+      const { field, operator, value } = condition;
+
+      if (!field || !operator) {
+        console.error('Condition missing required field or operator:', condition);
+        return false;
+      }
+
+      const fieldValue = this.getNestedValue(context.data, field);
+
+      switch (operator) {
+        case 'equals':
+        case '===':
+          return fieldValue === value;
+        case 'not_equals':
+        case '!==':
+          return fieldValue !== value;
+        case 'greater_than':
+        case '>':
+          return fieldValue != null && fieldValue > value;
+        case 'less_than':
+        case '<':
+          return fieldValue != null && fieldValue < value;
+        case 'greater_than_or_equals':
+        case '>=':
+          return fieldValue != null && fieldValue >= value;
+        case 'less_than_or_equals':
+        case '<=':
+          return fieldValue != null && fieldValue <= value;
+        case 'contains':
+          return typeof fieldValue === 'string' && typeof value === 'string' && fieldValue.includes(value);
+        case 'not_contains':
+          return typeof fieldValue === 'string' && typeof value === 'string' && !fieldValue.includes(value);
+        case 'in':
+          return Array.isArray(value) && value.includes(fieldValue);
+        case 'not_in':
+          return Array.isArray(value) && !value.includes(fieldValue);
+        case 'exists':
+          return fieldValue !== undefined && fieldValue !== null;
+        case 'not_exists':
+          return fieldValue === undefined || fieldValue === null;
+        default:
+          console.error(`Unknown condition operator: ${operator}`);
+          return false;
+      }
     } catch (error) {
       console.error('Condition evaluation error:', error);
       return false;
     }
+  }
+
+  /**
+   * Safely access a nested property using dot notation (e.g. "priority" or "user.role")
+   */
+  private getNestedValue(obj: Record<string, any>, path: string): any {
+    const keys = path.split('.');
+    let current: any = obj;
+
+    for (const key of keys) {
+      if (current === null || current === undefined || typeof current !== 'object') {
+        return undefined;
+      }
+      current = current[key];
+    }
+
+    return current;
   }
 
   /**

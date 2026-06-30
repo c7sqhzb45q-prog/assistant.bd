@@ -4,7 +4,7 @@
   "remoteCache": {
     "enabled": false
   },
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "build/**"]
