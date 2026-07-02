@@ -3,7 +3,43 @@
  * Handles: triggers, conditions, and actions
  */
 
-import { Workflow, Action } from '@assistant.bd/types';
+import { Workflow, Action, WorkflowExecutionRecord } from '@assistant.bd/types';
+
+function resolveOrchestratorUrl(): string {
+  const raw = process.env.ORCHESTRATOR_URL ?? 'http://localhost:3003';
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('ORCHESTRATOR_URL must use http or https');
+    }
+    return raw;
+  } catch {
+    // Fall back to safe default if env var is invalid
+    console.error('[WorkflowExecutor] Invalid ORCHESTRATOR_URL, using default http://localhost:3003');
+    return 'http://localhost:3003';
+  }
+}
+
+const ORCHESTRATOR_URL = resolveOrchestratorUrl();
+
+// Lightweight in-memory execution history (max 100 recent records)
+const executionHistory: WorkflowExecutionRecord[] = [];
+const MAX_HISTORY = 100;
+
+export function getExecutionHistory(): WorkflowExecutionRecord[] {
+  return executionHistory.slice();
+}
+
+function saveExecution(record: WorkflowExecutionRecord): void {
+  executionHistory.unshift(record);
+  if (executionHistory.length > MAX_HISTORY) {
+    executionHistory.splice(MAX_HISTORY);
+  }
+}
+
+function generateId(): string {
+  return `exec_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export interface WorkflowContext {
   workflowId: string;
@@ -30,9 +66,10 @@ export class WorkflowExecutor {
     context: WorkflowContext,
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
+    const executionId = context.executionId || generateId();
 
     try {
-      console.log(`[Workflow] Executing ${workflow.id}`, context);
+      console.log('[Workflow] Executing', { workflowId: workflow.id, executionId: context.executionId });
 
       if (!workflow.enabled) {
         throw new Error('Workflow is disabled');
@@ -48,15 +85,22 @@ export class WorkflowExecutor {
         );
 
         if (!conditionsMet) {
-          console.log(
-            `[Workflow] Conditions not met for ${workflow.id}, skipping actions`,
-          );
-          return {
+          console.log('[Workflow] Conditions not met, skipping actions', { workflowId: workflow.id });
+          const result: ExecutionResult = {
             success: true,
             output: { skipped: true, reason: 'conditions_not_met' },
             duration: Date.now() - startTime,
             actionsExecuted: 0,
           };
+          saveExecution({
+            id: executionId,
+            workflowId: workflow.id,
+            workflowName: workflow.name,
+            triggerData: context.data,
+            ...result,
+            createdAt: new Date(),
+          });
+          return result;
         }
       }
 
@@ -66,31 +110,49 @@ export class WorkflowExecutor {
 
       for (const action of definition.actions) {
         try {
-          console.log(`[Workflow] Executing action ${action.id}`);
+          console.log('[Workflow] Executing action', { actionId: action.id, type: action.type });
           lastOutput = await this.executeAction(action, context, lastOutput);
           actionsExecuted++;
         } catch (error) {
-          console.error(`[Workflow] Action ${action.id} failed:`, error);
+          console.error('[Workflow] Action failed', { actionId: action.id, error: error instanceof Error ? error.message : String(error) });
           // Continue or fail based on error handling strategy
           throw error;
         }
       }
 
-      return {
+      const result: ExecutionResult = {
         success: true,
         output: lastOutput,
         duration: Date.now() - startTime,
         actionsExecuted,
       };
+      saveExecution({
+        id: executionId,
+        workflowId: workflow.id,
+        workflowName: workflow.name,
+        triggerData: context.data,
+        ...result,
+        createdAt: new Date(),
+      });
+      return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(`[Workflow] Execution failed: ${message}`);
-      return {
+      const result: ExecutionResult = {
         success: false,
         error: message,
         duration: Date.now() - startTime,
         actionsExecuted: 0,
       };
+      saveExecution({
+        id: executionId,
+        workflowId: workflow.id,
+        workflowName: workflow.name,
+        triggerData: context.data,
+        ...result,
+        createdAt: new Date(),
+      });
+      return result;
     }
   }
 
@@ -249,14 +311,44 @@ export class WorkflowExecutor {
   }
 
   /**
-   * Run an AI agent
+   * Run an AI agent via the AI Orchestrator
    */
-  private async runAgent(config: any, _context: WorkflowContext) {
-    console.log(`[Action] Running agent: ${config.agentId}`);
-    // Route to AI Orchestrator
-    return {
-      agentResponse: 'Agent processed the request',
-    };
+  private async runAgent(config: any, context: WorkflowContext) {
+    const text: string = config.message ?? context.data.message ?? config.agentId ?? 'run agent';
+    const channel: string = config.channel ?? context.data.channel ?? 'api';
+
+    console.log('[Action] Running agent via orchestrator', { channel });
+
+    try {
+      const response = await fetch(`${ORCHESTRATOR_URL}/orchestrate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, channel }),
+        signal: AbortSignal.timeout(10_000),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => '');
+        throw new Error(`Orchestrator returned ${response.status}: ${errorBody}`);
+      }
+
+      const result = await response.json() as { agentType: string; reason: string; channel: string };
+
+      console.log('[Action] Orchestrator selected agent', { agentType: result.agentType, reason: result.reason });
+
+      return {
+        agentType: result.agentType,
+        reason: result.reason,
+        channel: result.channel,
+      };
+    } catch (error) {
+      const isTimeout = error instanceof Error && error.name === 'TimeoutError';
+      const message = isTimeout
+        ? 'Orchestrator request timed out after 10 seconds'
+        : (error instanceof Error ? error.message : String(error));
+      console.error('[Action] Orchestrator call failed', { message });
+      throw new Error(`run_agent failed: ${message}`);
+    }
   }
 }
 

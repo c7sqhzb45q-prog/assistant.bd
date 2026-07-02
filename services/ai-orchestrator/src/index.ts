@@ -216,6 +216,51 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
     return;
   }
 
+  if (req.url === '/orchestrate') {
+    if (req.method !== 'POST') {
+      res.writeHead(405, { Allow: 'POST' });
+      res.end();
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(req);
+      const { text, channel } = body;
+
+      if (typeof text !== 'string' || text.trim().length === 0) {
+        sendJson(res, 400, { error: 'Request body must include a non-empty string "text".' });
+        return;
+      }
+
+      const validChannels = ['whatsapp', 'facebook', 'email', 'api'];
+      const resolvedChannel = typeof channel === 'string' && validChannels.includes(channel)
+        ? (channel as OrchestrationRequest['channel'])
+        : 'api';
+
+      const decision = decideAgent({ text: text.trim(), channel: resolvedChannel });
+
+      log('info', 'agent_routed', { agentType: decision.agentType, reason: decision.reason, channel: resolvedChannel });
+
+      sendJson(res, 200, {
+        agentType: decision.agentType,
+        reason: decision.reason,
+        channel: resolvedChannel,
+      });
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        sendJson(res, 400, { error: 'Invalid JSON body.' });
+        return;
+      }
+      const errorId = createErrorId();
+      log('error', 'orchestrate_unexpected_error', {
+        errorId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      sendJson(res, 500, { error: 'Unexpected error during orchestration.', errorId });
+    }
+    return;
+  }
+
   if (req.url === '/ollama/generate') {
     if (req.method !== 'POST') {
       res.writeHead(405, { Allow: 'POST' });
@@ -304,9 +349,11 @@ async function main() {
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-main().catch((error) => {
-  log('error', 'service_start_failed', {
-    error: error instanceof Error ? error.message : String(error),
+if (require.main === module) {
+  main().catch((error) => {
+    log('error', 'service_start_failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    process.exit(1);
   });
-  process.exit(1);
-});
+}

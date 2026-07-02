@@ -131,6 +131,31 @@ export interface Integration {
   createdAt: Date;
 }
 
+// Orchestration
+export interface OrchestrationRequest {
+  channel: 'whatsapp' | 'facebook' | 'email' | 'api';
+  text: string;
+}
+
+export interface OrchestrationDecision {
+  agentType: AgentType;
+  reason: string;
+}
+
+// Workflow execution persistence
+export interface WorkflowExecutionRecord {
+  id: string;
+  workflowId: string;
+  workflowName: string;
+  triggerData: Record<string, any>;
+  success: boolean;
+  output?: any;
+  error?: string;
+  duration: number;
+  actionsExecuted: number;
+  createdAt: Date;
+}
+
 // API Response
 export interface ApiResponse<T> {
   success: boolean;

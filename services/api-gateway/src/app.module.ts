@@ -35,6 +35,8 @@ import { HealthController } from './controllers/health.controller';
         FRONTEND_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
         CORS_ORIGIN: Joi.string().optional(),
         FIRECRAWL_API_KEY: Joi.string().trim().optional(),
+        WORKFLOW_ENGINE_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
+        ORCHESTRATOR_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
         STRIPE_SECRET_KEY: Joi.when('NODE_ENV', {
           is: 'production',
           then: Joi.string().pattern(/^sk_/).required(),

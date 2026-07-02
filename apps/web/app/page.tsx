@@ -24,6 +24,10 @@ export default function Home() {
             <h2 className="font-bold mb-2">🧪 Billing</h2>
             <p className="text-sm text-gray-600">Feature test UI (requires API + Stripe config)</p>
           </a>
+          <a href="/demo" className="p-6 border rounded-lg block">
+            <h2 className="font-bold mb-2">▶ Workflow Demo</h2>
+            <p className="text-sm text-gray-600">End-to-end demo: message → workflow → AI orchestration</p>
+          </a>
           <div className="p-6 border rounded-lg">
             <h2 className="font-bold mb-2">🧱 Scaffolded modules</h2>
             <p className="text-sm text-gray-600">
