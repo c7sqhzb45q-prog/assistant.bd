@@ -6,6 +6,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { FirecrawlModule } from './modules/firecrawl/firecrawl.module';
 import { HealthController } from './controllers/health.controller';
 
 @Module({
@@ -33,6 +34,7 @@ import { HealthController } from './controllers/health.controller';
         }),
         FRONTEND_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
         CORS_ORIGIN: Joi.string().optional(),
+        FIRECRAWL_API_KEY: Joi.string().trim().optional(),
         STRIPE_SECRET_KEY: Joi.when('NODE_ENV', {
           is: 'production',
           then: Joi.string().pattern(/^sk_/).required(),
@@ -49,6 +51,7 @@ import { HealthController } from './controllers/health.controller';
     AgentModule,
     ConversationModule,
     BillingModule,
+    FirecrawlModule,
   ],
   controllers: [HealthController],
 })
