@@ -25,6 +25,7 @@ chmod +x scripts/dev-setup.sh
 ```
 
 This creates:
+
 - `.env` file with all required variables
 - Database initialization script
 - Docker Compose configuration
@@ -36,6 +37,7 @@ Edit `.env` with your actual API keys:
 ```env
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-...
+FIRECRAWL_API_KEY=fc-...
 WHATSAPP_ACCESS_TOKEN=...
 STRIPE_SECRET_KEY=sk_...
 ```
@@ -47,6 +49,7 @@ docker compose up -d   # or docker-compose up -d
 ```
 
 Verifies:
+
 - ✅ PostgreSQL running on :5432
 - ✅ Redis running on :6379
 - ✅ Database initialized
@@ -68,6 +71,7 @@ npm run -w @assistant.bd/web dev
 ```
 
 Or run all at once:
+
 ```bash
 npm run dev
 ```
@@ -77,6 +81,7 @@ npm run dev
 - **Dashboard**: http://localhost:3000
 - **API**: http://localhost:3001
 - **Health Check**: http://localhost:3001/health
+- **Firecrawl Scrape**: `POST /tools/firecrawl/scrape` (requires `FIRECRAWL_API_KEY` on the API gateway)
 
 ## Common Commands
 
