@@ -141,3 +141,14 @@ Open `https://assistant-bd-web-pr20.onrender.com/demo` in a browser.
 3. Merge PR #20 into `main`.
 4. Update or create production Render services from `main` and attach the
    `api.assistant.bd` custom domain to the API Gateway service.
+5. **Tear down the staging services** — once PR #20 is merged and promoted to
+   production, delete the four `-pr20` services from the Render dashboard to
+   avoid unnecessary charges:
+   - `assistant-bd-web-pr20`
+   - `assistant-bd-api-pr20`
+   - `assistant-bd-workflow-engine-pr20`
+   - `assistant-bd-ai-orchestrator-pr20`
+
+   If you want to keep a staging slot permanently, rename the services (remove
+   the `-pr20` suffix) and point them at the `main` branch instead of
+   deleting them.
