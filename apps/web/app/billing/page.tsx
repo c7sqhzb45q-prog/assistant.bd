@@ -19,7 +19,9 @@ type SessionResponse = {
 
 const STORAGE_KEY = 'assistant.bd.apiBaseUrl';
 const DEFAULT_API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3001';
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  'http://localhost:3001';
 
 function normalizeBaseUrl(value: string) {
   return value.trim().replace(/\/+$/, '');

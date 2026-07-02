@@ -1,254 +1,110 @@
-# 🧠 assistant.bd — AI Operating System
+# 🧠 assistant.bd
 
 [![CI](https://github.com/c7sqhzb45q-prog/assistant.bd/actions/workflows/ci.yml/badge.svg)](https://github.com/c7sqhzb45q-prog/assistant.bd/actions/workflows/ci.yml)
 
-**A production-grade no-code automation platform** combining:
-- **Zapier/Make.com** — Workflow automation
-- **Tasklet.ai** — AI agent orchestration  
-- **Notion** — Dynamic databases & CMS
-- **Bangladesh-first** — WhatsApp, bKash, local integrations
+Monorepo for an AI-enabled automation platform.
+
+> Current state: **MVP baseline in progress**. This repository contains a working core plus multiple scaffolded roadmap modules.
 
 ---
 
-## ✅ Current implementation status
+## ✅ Implemented vs scaffolded
 
-This repository now contains production-baseline assets for currently active components:
+| Area | Module | Status | Notes |
+|---|---|---|---|
+| App | `apps/web` | ✅ Active | Next.js app with home + billing test UI |
+| Service | `services/api-gateway` | ✅ Active | NestJS API with health/docs + billing endpoints |
+| Service | `services/workflow-engine` | ✅ Active | Workflow execution core + health/metrics |
+| Service | `services/ai-orchestrator` | ✅ Active | Basic orchestrator service |
+| Package | `packages/types` | ✅ Active | Shared TypeScript types |
+| Package | `packages/ai-core` | ✅ Active | Shared AI abstraction package |
+| Apps/Services/Packages (others) | e.g. inbox, builder, auth, crm, messaging, analytics, memory, queue | 🧱 Scaffolded | Placeholder directories or minimal stubs only |
 
-- Active app: `apps/web`
-- Active services: `services/api-gateway`, `services/workflow-engine`, `services/ai-orchestrator`
-- Shared packages in active use: `packages/ai-core`, `packages/types`
-- Deployment assets: `docker-compose.prod.yml`, `infra/kubernetes/*`, `infra/terraform/*`, `infra/monitoring/*`
-
-Other promised modules are scaffolded as placeholders and should be treated as roadmap items until implemented.
-
----
-
-## 🏗️ Monorepo Structure
-
-### 📱 **Apps** (User-facing UI layer)
-- `web/` — Next.js main dashboard
-- `inbox/` — Unified messaging inbox (WhatsApp, FB, IG, Email)
-- `builder/` — Visual agent builder (drag-drop AI creation)
-- `workflow-canvas/` — Zapier-style automation canvas
-- `admin/` — SaaS admin panel (billing, users, logs)
-- `landing/` — Marketing website
-
-### ⚙️ **Services** (Backend microservices)
-- `api-gateway/` — Main API entry point (NestJS)
-- `auth-service/` — JWT, OAuth, MFA
-- `crm-service/` — Customer memory system with vector DB
-- `messaging-service/` — WhatsApp, FB, IG, Telegram, Email routing
-- `ai-orchestrator/` — Agent decision engine (core brain)
-- `workflow-engine/` — Trigger → Condition → Action execution
-- `event-bus/` — Real-time message queue (Redis/NATS)
-- `billing-service/` — Subscriptions, payments (Stripe, bKash)
-- `analytics-service/` — Dashboards & usage insights
-
-### 🤖 **Agents** (AI employees)
-- `support-agent/` — Customer support automation
-- `sales-agent/` — Lead scoring & conversion
-- `voice-agent/` — Phone call handling
-- `booking-agent/` — Calendar & appointment scheduling
-- `custom-agent-runtime/` — User-created agents
-
-### 🔁 **Workflows** (Automation templates)
-- `templates/` — Pre-built workflows (ecommerce, lead gen, etc)
-- `runtime/` — Trigger engine, condition evaluator, action executor
-- `scheduler/` — Delayed jobs, reminders, scheduling
-
-### 📦 **Packages** (Shared libraries)
-- `ai-core/` — LLM wrapper (OpenAI, Anthropic, local LLMs)
-- `memory/` — Vector DB + CRM storage
-- `types/` — Shared TypeScript types
-- `utils/` — Common helpers & utilities
-- `connectors/` — External API integrations
-- `queue/` — Message queue abstraction
-- `logger/` — Centralized logging
-
-### 🏗️ **Infra** (Deployment)
-- `docker/` — Container definitions
-- `kubernetes/` — K8s manifests
-- `terraform/` — IaC (AWS, DigitalOcean)
-- `monitoring/` — Prometheus, Grafana
+Scaffolded modules are **not production-ready** and should be treated as roadmap items.
 
 ---
 
-## 🚀 Quick Start
+## 🏗️ Repository structure
+
+```text
+apps/
+  web/                active
+  admin/ builder/ inbox/ landing/ workflow-canvas/ todo-app/   scaffolded
+services/
+  api-gateway/ workflow-engine/ ai-orchestrator/               active
+  auth-service/ crm-service/ messaging-service/ billing-service/
+  analytics-service/ event-bus/                                scaffolded
+packages/
+  types/ ai-core/                                              active
+  memory/ connectors/ queue/ logger/ utils/                    scaffolded
+```
+
+---
+
+## 🚀 Local development
+
+### 1) Install
 
 ```bash
-# Install dependencies
-npm install
-
-# Run development environment
-npm run dev
-
-# Build for production
-npm run build
-
-# Deploy to production
-npm run deploy
+npm ci
 ```
 
----
-
-## 🔌 API Docs
-
-- Health check: `http://localhost:3001/health`
-- Swagger UI: `http://localhost:3001/docs`
-- OpenAPI JSON: `http://localhost:3001/docs-json`
-- Lovable integration guide: `docs/LOVABLE_API.md`
-
----
-
-## 🧠 Core Architecture
-
-```
-User Message (WhatsApp/Email/API)
-    ↓
-Messaging Service (receives & normalizes)
-    ↓
-Event Bus (Redis/NATS publish)
-    ↓
-Workflow Engine (checks triggers & conditions)
-    ↓
-AI Orchestrator (routes to best agent)
-    ↓
-Agent (Support/Sales/Voice/Custom)
-    ↓
-CRM Memory (stores interaction)
-    ↓
-Action Executor (reply/email/call/automation)
-```
-
----
-
-## 🔑 Key Features
-
-### Implemented and production-aligned now
-- ✅ Web dashboard runtime (`apps/web`)
-- ✅ API gateway service with health/readiness endpoints (`services/api-gateway`)
-- ✅ Workflow execution service with health/readiness endpoints (`services/workflow-engine`)
-- ✅ AI orchestration service with health/readiness endpoints (`services/ai-orchestrator`)
-- ✅ Shared active libraries (`packages/ai-core`, `packages/types`)
-- ✅ Production deployment assets (`docker-compose.prod.yml`, `infra/kubernetes/*`, `infra/terraform/*`, `infra/monitoring/*`)
-
-### Scaffolded / roadmap (not production-active yet)
-- ⏳ Additional apps (`apps/inbox`, `apps/builder`, `apps/workflow-canvas`, `apps/admin`, `apps/landing`)
-- ⏳ Additional backend services (auth, crm, messaging, billing, analytics, event-bus)
-- ⏳ Additional shared libraries (`packages/memory`, `packages/connectors`, `packages/queue`, `packages/logger`, `packages/utils`)
-
----
-
-## 📊 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 14, React, TailwindCSS, Zustand |
-| Backend | NestJS, Node.js |
-| Database | PostgreSQL, Redis |
-| AI/LLM | OpenAI, Anthropic |
-| Message Queue | Redis |
-| Deployment | Docker, Kubernetes, Terraform |
-| Monitoring | Prometheus, alert rules |
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
-
-This monorepo uses:
-- **Turborepo** for build optimization
-- **npm workspaces** for package management (pnpm optional)
-- **ESLint + Prettier** for code quality
+### 2) Run active modules
 
 ```bash
-# Development workflow
-npm install
 npm run dev
-
-# Run specific service
-npm run -w @assistant.bd/api-gateway dev
-
-# Run all tests
-npm run test
-
-# Lint & format
-npm run lint
-npm run format
 ```
 
+### 3) Useful endpoints
+
+- Web: `http://localhost:3000`
+- API health: `http://localhost:3001/health`
+- API docs: `http://localhost:3001/docs`
+
 ---
 
-## 📝 Environment Setup
+## 🧪 Quality checks used by CI
 
-Create `.env` files in each service:
-
-```env
-# API Gateway
-DATABASE_URL=postgresql://user:pass@localhost/assistantbd
-REDIS_URL=redis://localhost:6379
-OPENAI_API_KEY=sk-...
-JWT_SECRET=your-secret-key
-
-# Messaging Service
-WHATSAPP_BUSINESS_ACCOUNT_ID=...
-WHATSAPP_PHONE_NUMBER_ID=...
-WHATSAPP_ACCESS_TOKEN=...
-
-# Billing Service
-STRIPE_SECRET_KEY=sk_live_...
-BKASH_API_KEY=...
-
-# Monitoring
-DATADOG_API_KEY=...
+```bash
+npm run lint:active
+npm run type-check:active
+npm run test:active
+npm run build:active
 ```
 
----
-
-## 🔧 Database Schema Overview
-
-- **users** — Account & authentication
-- **teams** — Multi-tenant organization
-- **workspaces** — User workspaces
-- **workflows** — Automation definitions
-- **agents** — AI agent configurations
-- **conversations** — Message history
-- **customers** — CRM contacts
-- **integrations** — Connected apps
-- **logs** — Execution logs
-- **billing_events** — Usage tracking
+`test:active` currently uses `jest --passWithNoTests` in active services, so lack of test files does not fail CI.
 
 ---
 
-## 📚 Documentation
+## 🔐 Environment notes
 
-See `/docs` for:
-- Architecture deep-dive
-- API reference
-- Agent development guide
-- Workflow creation guide
-- Deployment guide
-- Production operations: `docs/PRODUCTION_OPERATIONS.md`
-- Production release checklist: `docs/PRODUCTION_CHECKLIST.md`
+- Use `.env.example` for local development values.
+- `docker-compose.yml` is local/dev only.
+- Use `.env.production.example` + `docker-compose.prod.yml` for production-style configuration.
+- Do **not** use placeholder defaults/secrets outside local development.
+
+The web billing page accepts either:
+- `NEXT_PUBLIC_API_BASE_URL` (preferred)
+- `NEXT_PUBLIC_API_URL` (compatibility)
 
 ---
 
-## 📞 Support
+## 📚 Key docs
 
-- **Maintainer**: Sojib Ahmmed — Marketsync Global Ltd
-- **Website**: https://sojibahmmed.com
-- **Email**: mail@sojibahmmed.com
-- **Phone**: +8801410913079
-- **Docs**: https://docs.assistant.bd
-- **Status**: https://status.assistant.bd
+- Project navigation: [`INDEX.md`](./INDEX.md)
+- Setup status summary: [`SETUP_SUMMARY.md`](./SETUP_SUMMARY.md)
+- Quick start: [`docs/QUICKSTART.md`](./docs/QUICKSTART.md)
+- Architecture: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- Agents guide: [`docs/AGENTS.md`](./docs/AGENTS.md)
+
+---
+
+## ⚠️ Out of scope in this repo alone
+
+Production integrations that still require external accounts/credentials include billing providers, messaging providers, hosted infrastructure, and operational/legal/compliance setup.
 
 ---
 
 ## ⚖️ License
 
-This project is licensed under the MIT License - see [LICENSE](./LICENSE) file for details.
-
----
-
-**Built with ❤️ for Bangladesh's SaaS ecosystem**
+MIT — see [`LICENSE`](./LICENSE).
