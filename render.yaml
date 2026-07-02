@@ -1,0 +1,92 @@
+services:
+  - type: web
+    name: assistant-bd-web-pr20
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run -w @assistant.bd/web build
+    startCommand: npm run -w @assistant.bd/web start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_BASE_URL
+        value: https://assistant-bd-api-pr20.onrender.com
+
+  - type: web
+    name: assistant-bd-api-pr20
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run -w @assistant.bd/types type-check && npm run -w @assistant.bd/api-gateway build
+    startCommand: npm run -w @assistant.bd/api-gateway start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        value: https://assistant-bd-web-pr20.onrender.com
+      - key: CORS_ORIGIN
+        value: https://assistant-bd-web-pr20.onrender.com
+      - key: WORKFLOW_ENGINE_URL
+        value: https://assistant-bd-workflow-engine-pr20.onrender.com
+      - key: ORCHESTRATOR_URL
+        value: https://assistant-bd-ai-orchestrator-pr20.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: FIRECRAWL_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_STARTER
+        sync: false
+      - key: STRIPE_PRICE_PRO
+        sync: false
+      - key: STRIPE_PRICE_BUSINESS
+        sync: false
+      - key: STRIPE_SUCCESS_URL
+        value: https://assistant-bd-web-pr20.onrender.com/billing/success?session_id={CHECKOUT_SESSION_ID}
+      - key: STRIPE_CANCEL_URL
+        value: https://assistant-bd-web-pr20.onrender.com/billing
+      - key: STRIPE_PORTAL_RETURN_URL
+        value: https://assistant-bd-web-pr20.onrender.com/billing
+
+  - type: web
+    name: assistant-bd-workflow-engine-pr20
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run -w @assistant.bd/types type-check && npm run -w @assistant.bd/workflow-engine build
+    startCommand: npm run -w @assistant.bd/workflow-engine start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ORCHESTRATOR_URL
+        value: https://assistant-bd-ai-orchestrator-pr20.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+
+  - type: web
+    name: assistant-bd-ai-orchestrator-pr20
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run -w @assistant.bd/ai-orchestrator build
+    startCommand: npm run -w @assistant.bd/ai-orchestrator start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: OLLAMA_BASE_URL
+        sync: false
+      - key: OLLAMA_MODEL
+        sync: false
