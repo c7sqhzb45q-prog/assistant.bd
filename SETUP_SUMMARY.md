@@ -1,217 +1,78 @@
-# ✅ assistant.bd Monorepo - Setup Complete!
+# ✅ assistant.bd Setup Summary (Current State)
 
-## 🎉 What Was Created
-
-Your production-ready AI Operating System monorepo is now set up at:
-```
-assistant.bd/
-```
-
-### Directory Structure
-
-```
-assistant.bd/
-├── apps/
-│   ├── web/                 ✅ Next.js dashboard
-│   ├── inbox/              ✅ Messaging UI
-│   ├── builder/            ✅ Agent builder
-│   ├── workflow-canvas/    ✅ Automation canvas
-│   ├── admin/              ✅ SaaS admin panel
-│   └── landing/            ✅ Marketing site
-│
-├── services/
-│   ├── api-gateway/        ✅ NestJS API (scaffold)
-│   ├── auth-service/       📁 Ready for auth logic
-│   ├── workflow-engine/    ✅ Workflow executor (core)
-│   ├── ai-orchestrator/    ✅ Agent routing (scaffold)
-│   ├── messaging-service/  📁 WhatsApp/Email/FB handler
-│   ├── crm-service/        📁 Customer memory system
-│   ├── billing-service/    📁 Payments & subscriptions
-│   ├── analytics-service/  📁 Dashboards & metrics
-│   └── event-bus/          📁 Redis message queue
-│
-├── packages/
-│   ├── types/              ✅ Shared TypeScript types
-│   ├── ai-core/            ✅ LLM abstraction layer
-│   ├── memory/             📁 Vector DB + CRM queries
-│   ├── connectors/         📁 External API integrations
-│   ├── queue/              📁 Message queue abstraction
-│   ├── logger/             📁 Centralized logging
-│   └── utils/              📁 Common helpers
-│
-├── agents/
-│   ├── support-agent/      📁 Customer support
-│   ├── sales-agent/        📁 Lead qualification
-│   ├── voice-agent/        📁 Phone calls
-│   ├── booking-agent/      📁 Scheduling
-│   └── custom-agent-runtime/ 📁 User-created agents
-│
-├── workflows/
-│   ├── templates/          📁 Pre-built workflows
-│   ├── runtime/            ✅ Trigger/condition/action engine
-│   └── scheduler/          📁 Job scheduling
-│
-├── infra/
-│   ├── docker/             ✅ Dockerfiles (API, Worker)
-│   ├── kubernetes/         📁 K8s manifests
-│   ├── terraform/          📁 IaC (AWS, DigitalOcean)
-│   └── monitoring/         📁 Prometheus, Grafana
-│
-├── scripts/
-│   ├── dev-setup.sh        ✅ One-click development setup
-│   └── deploy.sh           ✅ Production deployment
-│
-├── docs/
-│   ├── ARCHITECTURE.md     ✅ System design deep-dive
-│   ├── QUICKSTART.md       ✅ 10-minute start guide
-│   ├── AGENTS.md           ✅ Building AI agents
-│   └── (more coming)
-│
-├── docker-compose.yml      ✅ Local development stack
-├── package.json            ✅ Root monorepo config
-├── turbo.json              ✅ Build optimization
-├── tsconfig.json           ✅ TypeScript root config
-├── .env.example            ✅ Environment template
-├── .gitignore              ✅ Git ignore rules
-└── README.md               ✅ Main documentation
-```
-
-**Legend**: ✅ = Created & Ready | 📁 = Scaffolded for you
+This document records what is currently usable in-repo without external accounts, and what remains scaffolded.
 
 ---
 
-## 🚀 Next Steps (5 minutes)
+## Implemented now (inside this repository)
 
-### 1. Install Dependencies
-```bash
-cd /path/to/assistant.bd
-npm install
-```
+### Active app
+- `apps/web` — Next.js MVP shell with status-oriented home page and billing test UI.
 
-### 2. Setup Development Environment
-```bash
-chmod +x scripts/dev-setup.sh
-./scripts/dev-setup.sh
-```
+### Active services
+- `services/api-gateway` — NestJS service with health/docs and billing-related API routes.
+- `services/workflow-engine` — Workflow execution service with health/metrics endpoints.
+- `services/ai-orchestrator` — Orchestrator service baseline.
 
-This automatically:
-- ✅ Creates `.env` file with all variables
-- ✅ Generates database init script
-- ✅ Sets up Docker configuration
-
-### 3. Update Secrets (Important!)
-```bash
-# Edit .env with your API keys
-nano .env
-
-# Required keys:
-OPENAI_API_KEY=sk-...
-WHATSAPP_ACCESS_TOKEN=...
-STRIPE_SECRET_KEY=sk_...
-```
-
-### 4. Start Infrastructure
-```bash
-docker compose up -d   # or docker-compose up -d
-
-# Verify:
-docker compose ps      # or docker-compose ps
-```
-
-### 5. Run All Services
-```bash
-# Option A: Run all at once (easy)
-npm run dev
-
-# Option B: Run individually (better debugging)
-npm run -w @assistant.bd/api-gateway dev
-npm run -w @assistant.bd/workflow-engine dev
-npm run -w @assistant.bd/web dev
-```
-
-### 6. Verify Setup
-```bash
-# Check API Gateway
-curl http://localhost:3001/health
-
-# Open Dashboard
-open http://localhost:3000
-```
+### Active shared packages
+- `packages/types`
+- `packages/ai-core`
 
 ---
 
-## 📦 What's Included
+## Scaffolded / roadmap modules
 
-### ✅ Fully Configured
-- PostgreSQL 16 + Redis 7 (Docker Compose)
-- NestJS API Gateway scaffold
-- Workflow engine with execution logic
-- Shared TypeScript types
-- Next.js dashboard scaffold
-- Comprehensive documentation
+The following are not fully implemented and should not be treated as production-ready:
 
-### 🔧 Infrastructure Ready
-- Docker Compose (6 services)
-- Turbo for build optimization
-- npm for installs (pnpm optional)
-- Production deployment scripts
-
-### 📚 Full Documentation
-- Architecture guide
-- Quick start guide
-- Agent building guide
-- Environment variables template
+- Apps: `admin`, `builder`, `inbox`, `landing`, `workflow-canvas`, `todo-app`
+- Services: `auth-service`, `crm-service`, `messaging-service`, `billing-service`, `analytics-service`, `event-bus`
+- Packages: `memory`, `connectors`, `queue`, `logger`, `utils`
+- Agents and workflow template directories under `agents/` and `workflows/` are mostly scaffold-level.
 
 ---
 
-## 🎯 What to Build First
-
-1. **Authentication** — User login & team management
-2. **Workflow Builder UI** — Visual workflow canvas
-3. **Messaging Integrations** — WhatsApp, Email
-4. **First AI Agent** — Support bot template
-
----
-
-## 📊 Project Stats
-
-- **Files Created**: 31+
-- **Directories**: 45+
-- **Services**: 9
-- **Frontend Apps**: 6
-- **Shared Packages**: 7
-- **Documentation Pages**: 3
-
----
-
-## 🆘 Quick Troubleshooting
+## Local setup (active modules)
 
 ```bash
-# Clean & reinstall
-npm run clean
-npm install
-
-# View Docker logs
-docker compose logs -f   # or docker-compose logs -f
-
-# Database access
-psql postgresql://admin:secure_password@localhost:5432/assistant_bd
-```
-
----
-
-## 🎉 You're Ready!
-
-**Start with:**
-```bash
-cd /path/to/assistant.bd
-npm install && ./scripts/dev-setup.sh
-docker compose up -d   # or docker-compose up -d
+npm ci
 npm run dev
 ```
 
-**Then visit:** http://localhost:3000 🚀
+### Active verification commands
+
+```bash
+npm run lint:active
+npm run type-check:active
+npm run test:active
+npm run build:active
+```
+
+### Local endpoints
+
+- Web: `http://localhost:3000`
+- API health: `http://localhost:3001/health`
+- API docs: `http://localhost:3001/docs`
 
 ---
 
-**Happy building! You have a production-grade AI SaaS foundation.**
+## Environment and safety notes
+
+- `.env.example` is a broad template and includes variables for roadmap integrations.
+- `docker-compose.yml` is for local/dev only.
+- `.env.production.example` intentionally has blank required values.
+- Do not deploy placeholder secrets/keys to any shared or production environment.
+
+Web billing page compatibility:
+- Preferred: `NEXT_PUBLIC_API_BASE_URL`
+- Also supported: `NEXT_PUBLIC_API_URL`
+
+---
+
+## What remains out of scope for repo-only work
+
+These require external accounts/credentials/infrastructure and are not completed by code changes alone:
+
+- Live billing/payment provider setup
+- Messaging provider setup
+- Hosted production infrastructure and domain/TLS
+- Compliance/legal/operational readiness
