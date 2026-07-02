@@ -10,15 +10,15 @@ Monorepo for an AI-enabled automation platform.
 
 ## ✅ Implemented vs scaffolded
 
-| Area | Module | Status | Notes |
-|---|---|---|---|
-| App | `apps/web` | ✅ Active | Next.js app with home + billing test UI |
-| Service | `services/api-gateway` | ✅ Active | NestJS API with health/docs + billing endpoints |
-| Service | `services/workflow-engine` | ✅ Active | Workflow execution core + health/metrics |
-| Service | `services/ai-orchestrator` | ✅ Active | Basic orchestrator service |
-| Package | `packages/types` | ✅ Active | Shared TypeScript types |
-| Package | `packages/ai-core` | ✅ Active | Shared AI abstraction package |
-| Apps/Services/Packages (others) | e.g. inbox, builder, auth, crm, messaging, analytics, memory, queue | 🧱 Scaffolded | Placeholder directories or minimal stubs only |
+| Area                            | Module                                                              | Status        | Notes                                           |
+| ------------------------------- | ------------------------------------------------------------------- | ------------- | ----------------------------------------------- |
+| App                             | `apps/web`                                                          | ✅ Active     | Next.js app with home + billing test UI         |
+| Service                         | `services/api-gateway`                                              | ✅ Active     | NestJS API with health/docs + billing endpoints |
+| Service                         | `services/workflow-engine`                                          | ✅ Active     | Workflow execution core + health/metrics        |
+| Service                         | `services/ai-orchestrator`                                          | ✅ Active     | Basic orchestrator service                      |
+| Package                         | `packages/types`                                                    | ✅ Active     | Shared TypeScript types                         |
+| Package                         | `packages/ai-core`                                                  | ✅ Active     | Shared AI abstraction package                   |
+| Apps/Services/Packages (others) | e.g. inbox, builder, auth, crm, messaging, analytics, memory, queue | 🧱 Scaffolded | Placeholder directories or minimal stubs only   |
 
 Scaffolded modules are **not production-ready** and should be treated as roadmap items.
 
@@ -60,6 +60,7 @@ npm run dev
 - Web: `http://localhost:3000`
 - API health: `http://localhost:3001/health`
 - API docs: `http://localhost:3001/docs`
+- Firecrawl scrape: `POST http://localhost:3001/tools/firecrawl/scrape`
 
 ---
 
@@ -83,8 +84,10 @@ npm run build:active
 - Use `.env.production.example` + `docker-compose.prod.yml` for production-style configuration.
 - Do **not** use placeholder defaults/secrets outside local development.
 - Optional self-hosted Ollama support is available in `services/ai-orchestrator` via `OLLAMA_BASE_URL` and `OLLAMA_MODEL`.
+- `FIRECRAWL_API_KEY` is server-only and used by `services/api-gateway` for `POST /tools/firecrawl/scrape`.
 
 The web billing page accepts either:
+
 - `NEXT_PUBLIC_API_BASE_URL` (preferred)
 - `NEXT_PUBLIC_API_URL` (compatibility)
 
@@ -108,6 +111,18 @@ Test inference (server-side endpoint):
 curl -X POST http://localhost:3003/ollama/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Reply with: ok"}'
+```
+
+### Firecrawl scrape example
+
+```bash
+curl -X POST http://localhost:3001/tools/firecrawl/scrape \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://example.com",
+    "formats": ["markdown"],
+    "onlyMainContent": true
+  }'
 ```
 
 ---
