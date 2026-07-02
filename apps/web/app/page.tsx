@@ -27,18 +27,17 @@ export default function Home() {
           <div className="p-6 border rounded-lg">
             <h2 className="font-bold mb-2">🧱 Scaffolded modules</h2>
             <p className="text-sm text-gray-600">
-              Additional apps/services/packages are roadmap placeholders (see README/SETUP_SUMMARY for the current full list).
+              Additional apps/services/packages are roadmap placeholders (see README.md and SETUP_SUMMARY.md for the current full list).
             </p>
           </div>
         </div>
 
         <div className="space-y-4">
           <h3 className="font-bold text-lg">📚 Current status docs</h3>
-          <ul className="space-y-2 text-left max-w-md mx-auto">
-            <li>📖 <a href="https://github.com/c7sqhzb45q-prog/assistant.bd/blob/main/README.md" className="text-blue-600 hover:underline">Repository README (active vs scaffolded)</a></li>
-            <li>🗂️ <a href="https://github.com/c7sqhzb45q-prog/assistant.bd/blob/main/INDEX.md" className="text-blue-600 hover:underline">Project navigation index</a></li>
-            <li>🚀 <a href="https://github.com/c7sqhzb45q-prog/assistant.bd/blob/main/docs/QUICKSTART.md" className="text-blue-600 hover:underline">Quickstart for local development</a></li>
-          </ul>
+          <p className="text-left max-w-md mx-auto text-sm text-gray-600">
+            Check repository docs for current implementation status:
+            {' '}<code>README.md</code>, <code>INDEX.md</code>, and <code>docs/QUICKSTART.md</code>.
+          </p>
         </div>
       </div>
     </main>
