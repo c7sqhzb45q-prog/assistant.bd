@@ -27,7 +27,7 @@ export default function Home() {
           <div className="p-6 border rounded-lg">
             <h2 className="font-bold mb-2">🧱 Scaffolded modules</h2>
             <p className="text-sm text-gray-600">
-              Inbox, Builder, Workflow Canvas, Auth, CRM, Messaging, Billing service, and others are roadmap placeholders.
+              Additional apps/services/packages are roadmap placeholders (see README/SETUP_SUMMARY for the current full list).
             </p>
           </div>
         </div>
