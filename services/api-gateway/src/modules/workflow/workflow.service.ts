@@ -12,12 +12,28 @@ function generateId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function resolveServiceUrl(value: string | undefined, defaultUrl: string): string {
+  const raw = value ?? defaultUrl;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('Service URL must use http or https');
+    }
+    return raw;
+  } catch {
+    return defaultUrl;
+  }
+}
+
 @Injectable()
 export class WorkflowService {
   private readonly engineUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    this.engineUrl = this.config.get<string>('WORKFLOW_ENGINE_URL') ?? 'http://localhost:3002';
+    this.engineUrl = resolveServiceUrl(
+      this.config.get<string>('WORKFLOW_ENGINE_URL'),
+      'http://localhost:3002',
+    );
   }
 
   async execute(dto: ExecuteWorkflowDto) {
@@ -83,7 +99,9 @@ export class WorkflowService {
         { timeout: 5_000 },
       );
       return data.history;
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[WorkflowService] Failed to fetch execution history: ${message}`);
       return [];
     }
   }

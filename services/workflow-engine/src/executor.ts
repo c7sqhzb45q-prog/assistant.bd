@@ -5,7 +5,22 @@
 
 import { Workflow, Action, WorkflowExecutionRecord } from '@assistant.bd/types';
 
-const ORCHESTRATOR_URL = process.env.ORCHESTRATOR_URL ?? 'http://localhost:3003';
+function resolveOrchestratorUrl(): string {
+  const raw = process.env.ORCHESTRATOR_URL ?? 'http://localhost:3003';
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new Error('ORCHESTRATOR_URL must use http or https');
+    }
+    return raw;
+  } catch {
+    // Fall back to safe default if env var is invalid
+    console.error('[WorkflowExecutor] Invalid ORCHESTRATOR_URL, using default http://localhost:3003');
+    return 'http://localhost:3003';
+  }
+}
+
+const ORCHESTRATOR_URL = resolveOrchestratorUrl();
 
 // Lightweight in-memory execution history (max 100 recent records)
 const executionHistory: WorkflowExecutionRecord[] = [];
@@ -54,7 +69,7 @@ export class WorkflowExecutor {
     const executionId = context.executionId || generateId();
 
     try {
-      console.log(`[Workflow] Executing ${workflow.id}`, context);
+      console.log('[Workflow] Executing', { workflowId: workflow.id, executionId: context.executionId });
 
       if (!workflow.enabled) {
         throw new Error('Workflow is disabled');
@@ -70,9 +85,7 @@ export class WorkflowExecutor {
         );
 
         if (!conditionsMet) {
-          console.log(
-            `[Workflow] Conditions not met for ${workflow.id}, skipping actions`,
-          );
+          console.log('[Workflow] Conditions not met, skipping actions', { workflowId: workflow.id });
           const result: ExecutionResult = {
             success: true,
             output: { skipped: true, reason: 'conditions_not_met' },
@@ -97,11 +110,11 @@ export class WorkflowExecutor {
 
       for (const action of definition.actions) {
         try {
-          console.log(`[Workflow] Executing action ${action.id}`);
+          console.log('[Workflow] Executing action', { actionId: action.id, type: action.type });
           lastOutput = await this.executeAction(action, context, lastOutput);
           actionsExecuted++;
         } catch (error) {
-          console.error(`[Workflow] Action ${action.id} failed:`, error);
+          console.error('[Workflow] Action failed', { actionId: action.id, error: error instanceof Error ? error.message : String(error) });
           // Continue or fail based on error handling strategy
           throw error;
         }
@@ -304,7 +317,7 @@ export class WorkflowExecutor {
     const text: string = config.message ?? context.data.message ?? config.agentId ?? 'run agent';
     const channel: string = config.channel ?? context.data.channel ?? 'api';
 
-    console.log(`[Action] Running agent via orchestrator: channel=${channel} text="${text}"`);
+    console.log('[Action] Running agent via orchestrator', { channel });
 
     try {
       const response = await fetch(`${ORCHESTRATOR_URL}/orchestrate`, {
@@ -321,7 +334,7 @@ export class WorkflowExecutor {
 
       const result = await response.json() as { agentType: string; reason: string; channel: string };
 
-      console.log(`[Action] Orchestrator selected agent: ${result.agentType} (${result.reason})`);
+      console.log('[Action] Orchestrator selected agent', { agentType: result.agentType, reason: result.reason });
 
       return {
         agentType: result.agentType,
@@ -329,8 +342,11 @@ export class WorkflowExecutor {
         channel: result.channel,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`[Action] Orchestrator call failed: ${message}`);
+      const isTimeout = error instanceof Error && error.name === 'TimeoutError';
+      const message = isTimeout
+        ? 'Orchestrator request timed out after 10 seconds'
+        : (error instanceof Error ? error.message : String(error));
+      console.error('[Action] Orchestrator call failed', { message });
       throw new Error(`run_agent failed: ${message}`);
     }
   }
