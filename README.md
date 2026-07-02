@@ -114,9 +114,18 @@ curl -X POST http://localhost:3001/tools/firecrawl/scrape \
 
 ---
 
-## ⚠️ Out of scope in this repo alone
+## ⚠️ What this repo does not complete by itself
 
-Production integrations that still require external accounts/credentials include billing providers, messaging providers, hosted infrastructure, and operational/legal/compliance setup.
+This repository can provide the application code, local Docker setup, and production-oriented configuration templates, but some production capabilities still depend on systems and approvals that must be created or managed outside the repo.
+
+Examples include:
+
+- **Billing providers** such as Stripe, which require a real external account and live API credentials.
+- **Messaging providers** such as WhatsApp, Twilio, email, or social platform integrations, which require provider accounts, webhook setup, and channel approval.
+- **Hosted infrastructure** such as production databases, Redis, DNS, TLS, secrets management, container hosting, and network/security configuration.
+- **Operational / legal / compliance work** such as policies, consent flows, incident response, data retention, and any business-specific review or approval process.
+
+In short: the codebase can prepare and integrate with these systems, but it cannot create the external accounts, provision third-party services, or satisfy non-code production requirements on its own.
 
 ---
 
