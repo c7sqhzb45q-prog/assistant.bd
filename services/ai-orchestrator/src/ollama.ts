@@ -30,7 +30,7 @@ export async function generateWithOllama(params: OllamaGenerateParams) {
   try {
     const response = await fetch(`${trimTrailingSlash(params.baseUrl)}/api/generate`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: params.model,
         prompt: params.prompt,
@@ -49,7 +49,10 @@ export async function generateWithOllama(params: OllamaGenerateParams) {
 
     const data = (await response.json()) as { response?: unknown };
     if (typeof data.response !== 'string') {
-      throw new OllamaRequestError('Ollama returned an invalid response payload');
+      throw new OllamaRequestError(
+        'Ollama returned an invalid response payload: expected a string in the "response" field',
+        500,
+      );
     }
 
     return data.response;
@@ -59,7 +62,9 @@ export async function generateWithOllama(params: OllamaGenerateParams) {
     }
 
     throw new OllamaRequestError(
-      `Unable to reach Ollama at ${params.baseUrl}. Ensure the service is running and accessible.`,
+      `Unable to reach Ollama at ${params.baseUrl}. Ensure the service is running and accessible. Root cause: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 }

@@ -115,7 +115,9 @@ function loadEnvironment(): Environment {
   const hasOllamaBaseUrl = Boolean(env.OLLAMA_BASE_URL);
   const hasOllamaModel = Boolean(env.OLLAMA_MODEL);
   if (hasOllamaBaseUrl !== hasOllamaModel) {
-    throw new Error('OLLAMA_BASE_URL and OLLAMA_MODEL must both be set to enable Ollama support');
+    throw new Error(
+      'Both OLLAMA_BASE_URL and OLLAMA_MODEL must be set together, or neither should be set.',
+    );
   }
   if (hasOllamaBaseUrl && !isValidUrl(env.OLLAMA_BASE_URL!, ['http', 'https'])) {
     throw new Error('OLLAMA_BASE_URL must be a valid http/https URL');
@@ -125,7 +127,7 @@ function loadEnvironment(): Environment {
 }
 
 function sendJson(res: ServerResponse, statusCode: number, payload: Record<string, unknown>) {
-  res.writeHead(statusCode, { 'content-type': 'application/json' });
+  res.writeHead(statusCode, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(payload));
 }
 
@@ -135,7 +137,9 @@ async function readJsonBody(req: IncomingMessage) {
     req.setEncoding('utf8');
     req.on('data', (chunk: string) => chunks.push(chunk));
     req.on('end', () => resolve(chunks.join('')));
-    req.on('error', (error) => reject(error));
+    req.on('error', (error) =>
+      reject(new Error(`Failed to read request body: ${error instanceof Error ? error.message : String(error)}`)),
+    );
   });
 
   if (!body) {
@@ -153,8 +157,7 @@ async function handleOllamaGenerate(req: IncomingMessage, res: ServerResponse, e
   }
 
   const body = await readJsonBody(req);
-  const prompt = body.prompt;
-  const system = body.system;
+  const { prompt, system } = body;
 
   if (typeof prompt !== 'string' || prompt.trim().length === 0) {
     sendJson(res, 400, { error: 'Request body must include a non-empty string "prompt".' });
@@ -211,7 +214,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
 
   if (req.url === '/ollama/generate') {
     if (req.method !== 'POST') {
-      res.writeHead(405, { allow: 'POST' });
+      res.writeHead(405, { Allow: 'POST' });
       res.end();
       return;
     }
@@ -246,7 +249,17 @@ async function main() {
   let ready = false;
 
   const server = createServer((req, res) => {
-    void handleRequest(req, res, ready, env);
+    void handleRequest(req, res, ready, env).catch((error) => {
+      log('error', 'request_handling_failed', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      if (!res.headersSent) {
+        sendJson(res, 500, { error: 'Unexpected server error.' });
+      } else {
+        res.end();
+      }
+    });
   });
 
   await new Promise<void>((resolve) => {

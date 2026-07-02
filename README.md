@@ -106,7 +106,7 @@ Test inference (server-side endpoint):
 
 ```bash
 curl -X POST http://localhost:3003/ollama/generate \
-  -H "content-type: application/json" \
+  -H "Content-Type: application/json" \
   -d '{"prompt":"Reply with: ok"}'
 ```
 
