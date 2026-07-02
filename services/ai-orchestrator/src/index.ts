@@ -131,6 +131,10 @@ function sendJson(res: ServerResponse, statusCode: number, payload: Record<strin
   res.end(JSON.stringify(payload));
 }
 
+function createErrorId() {
+  return `err_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 async function readJsonBody(req: IncomingMessage) {
   const chunks: string[] = [];
   const body = await new Promise<string>((resolve, reject) => {
@@ -235,7 +239,16 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
         return;
       }
 
-      sendJson(res, 500, { error: 'Unexpected error while generating response from Ollama.' });
+      const errorId = createErrorId();
+      log('error', 'ollama_generate_unexpected_error', {
+        errorId,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      sendJson(res, 500, {
+        error: 'Unexpected error while generating response from Ollama.',
+        errorId,
+      });
     }
     return;
   }
@@ -250,12 +263,14 @@ async function main() {
 
   const server = createServer((req, res) => {
     void handleRequest(req, res, ready, env).catch((error) => {
+      const errorId = createErrorId();
       log('error', 'request_handling_failed', {
+        errorId,
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,
       });
       if (!res.headersSent) {
-        sendJson(res, 500, { error: 'Unexpected server error.' });
+        sendJson(res, 500, { error: 'Unexpected server error.', errorId });
       } else {
         res.end();
       }
