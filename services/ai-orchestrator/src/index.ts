@@ -1,4 +1,5 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http';
+import { generateWithOllama, OllamaConfigError, OllamaRequestError } from './ollama';
 
 type AgentType = 'support' | 'sales' | 'voice' | 'booking' | 'custom';
 
@@ -8,6 +9,8 @@ type Environment = {
   OPENAI_API_KEY?: string;
   DATABASE_URL?: string;
   REDIS_URL?: string;
+  OLLAMA_BASE_URL?: string;
+  OLLAMA_MODEL?: string;
 };
 
 export interface OrchestrationRequest {
@@ -82,6 +85,8 @@ function loadEnvironment(): Environment {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
     REDIS_URL: process.env.REDIS_URL,
+    OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL?.trim(),
+    OLLAMA_MODEL: process.env.OLLAMA_MODEL?.trim(),
   };
 
   const missingInProd: string[] = [];
@@ -107,10 +112,74 @@ function loadEnvironment(): Environment {
     }
   }
 
+  const hasOllamaBaseUrl = Boolean(env.OLLAMA_BASE_URL);
+  const hasOllamaModel = Boolean(env.OLLAMA_MODEL);
+  if (hasOllamaBaseUrl !== hasOllamaModel) {
+    throw new Error('OLLAMA_BASE_URL and OLLAMA_MODEL must both be set to enable Ollama support');
+  }
+  if (hasOllamaBaseUrl && !isValidUrl(env.OLLAMA_BASE_URL!, ['http', 'https'])) {
+    throw new Error('OLLAMA_BASE_URL must be a valid http/https URL');
+  }
+
   return env;
 }
 
-function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean) {
+function sendJson(res: ServerResponse, statusCode: number, payload: Record<string, unknown>) {
+  res.writeHead(statusCode, { 'content-type': 'application/json' });
+  res.end(JSON.stringify(payload));
+}
+
+async function readJsonBody(req: IncomingMessage) {
+  const chunks: string[] = [];
+  const body = await new Promise<string>((resolve, reject) => {
+    req.setEncoding('utf8');
+    req.on('data', (chunk: string) => chunks.push(chunk));
+    req.on('end', () => resolve(chunks.join('')));
+    req.on('error', (error) => reject(error));
+  });
+
+  if (!body) {
+    return {};
+  }
+
+  return JSON.parse(body) as Record<string, unknown>;
+}
+
+async function handleOllamaGenerate(req: IncomingMessage, res: ServerResponse, env: Environment) {
+  if (!env.OLLAMA_BASE_URL || !env.OLLAMA_MODEL) {
+    throw new OllamaConfigError(
+      'Ollama is not configured. Set OLLAMA_BASE_URL and OLLAMA_MODEL to enable this endpoint.',
+    );
+  }
+
+  const body = await readJsonBody(req);
+  const prompt = body.prompt;
+  const system = body.system;
+
+  if (typeof prompt !== 'string' || prompt.trim().length === 0) {
+    sendJson(res, 400, { error: 'Request body must include a non-empty string "prompt".' });
+    return;
+  }
+  if (system !== undefined && typeof system !== 'string') {
+    sendJson(res, 400, { error: 'Request field "system" must be a string when provided.' });
+    return;
+  }
+
+  const response = await generateWithOllama({
+    baseUrl: env.OLLAMA_BASE_URL,
+    model: env.OLLAMA_MODEL,
+    prompt,
+    system,
+  });
+
+  sendJson(res, 200, {
+    provider: 'ollama',
+    model: env.OLLAMA_MODEL,
+    response,
+  });
+}
+
+async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: boolean, env: Environment) {
   if (!req.url) {
     res.writeHead(404);
     res.end();
@@ -118,14 +187,9 @@ function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean)
   }
 
   if (req.url === '/health') {
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(
-      JSON.stringify({ status: 'ok', service: 'ai-orchestrator', timestamp: new Date().toISOString() }),
-    );
+    sendJson(res, 200, { status: 'ok', service: 'ai-orchestrator', timestamp: new Date().toISOString() });
     return;
   }
-
-
   if (req.url === '/metrics') {
     res.writeHead(200, { 'content-type': 'text/plain; version=0.0.4' });
     res.end(
@@ -137,14 +201,39 @@ function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean)
   }
 
   if (req.url === '/ready') {
-    res.writeHead(ready ? 200 : 503, { 'content-type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        status: ready ? 'ok' : 'starting',
-        service: 'ai-orchestrator',
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    sendJson(res, ready ? 200 : 503, {
+      status: ready ? 'ok' : 'starting',
+      service: 'ai-orchestrator',
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
+
+  if (req.url === '/ollama/generate') {
+    if (req.method !== 'POST') {
+      res.writeHead(405, { allow: 'POST' });
+      res.end();
+      return;
+    }
+
+    try {
+      await handleOllamaGenerate(req, res, env);
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        sendJson(res, 400, { error: 'Invalid JSON body.' });
+        return;
+      }
+      if (error instanceof OllamaConfigError) {
+        sendJson(res, 503, { error: error.message });
+        return;
+      }
+      if (error instanceof OllamaRequestError) {
+        sendJson(res, error.statusCode, { error: error.message });
+        return;
+      }
+
+      sendJson(res, 500, { error: 'Unexpected error while generating response from Ollama.' });
+    }
     return;
   }
 
@@ -156,7 +245,9 @@ async function main() {
   const env = loadEnvironment();
   let ready = false;
 
-  const server = createServer((req, res) => handleHealth(req, res, ready));
+  const server = createServer((req, res) => {
+    void handleRequest(req, res, ready, env);
+  });
 
   await new Promise<void>((resolve) => {
     server.listen(env.PORT, '0.0.0.0', () => resolve());
