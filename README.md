@@ -83,12 +83,35 @@ npm run build:active
 - `docker-compose.yml` is local/dev only.
 - Use `.env.production.example` + `docker-compose.prod.yml` for production-style configuration.
 - Do **not** use placeholder defaults/secrets outside local development.
+- Optional self-hosted Ollama support is available in `services/ai-orchestrator` via `OLLAMA_BASE_URL` and `OLLAMA_MODEL`.
 - `FIRECRAWL_API_KEY` is server-only and used by `services/api-gateway` for `POST /tools/firecrawl/scrape`.
 
 The web billing page accepts either:
 
 - `NEXT_PUBLIC_API_BASE_URL` (preferred)
 - `NEXT_PUBLIC_API_URL` (compatibility)
+
+### Optional: run Ollama locally for ai-orchestrator
+
+```bash
+ollama serve
+ollama pull llama3.1:8b
+```
+
+Then set:
+
+```bash
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+```
+
+Test inference (server-side endpoint):
+
+```bash
+curl -X POST http://localhost:3003/ollama/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Reply with: ok"}'
+```
 
 ### Firecrawl scrape example
 
