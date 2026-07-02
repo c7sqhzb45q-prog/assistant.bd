@@ -8,7 +8,7 @@
     "dev": "ts-node src/main.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
-    "test": "jest --passWithNoTests",
+    "test": "jest --config jest.config.cjs --passWithNoTests",
     "lint": "eslint --ext .ts src/",
     "type-check": "tsc --noEmit"
   },

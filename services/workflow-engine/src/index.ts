@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http';
-import { WorkflowExecutor } from './executor';
+import { WorkflowExecutor, WorkflowContext, getExecutionHistory } from './executor';
+import type { Workflow } from '@assistant.bd/types';
 
 type Environment = {
   NODE_ENV: 'development' | 'test' | 'production';
@@ -81,7 +82,34 @@ function loadEnvironment(): Environment {
   return env;
 }
 
-function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean) {
+function sendJson(res: ServerResponse, statusCode: number, payload: unknown) {
+  res.writeHead(statusCode, { 'content-type': 'application/json' });
+  res.end(JSON.stringify(payload));
+}
+
+function createErrorId() {
+  return `err_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function generateId(prefix: string): string {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+  const chunks: string[] = [];
+  const body = await new Promise<string>((resolve, reject) => {
+    req.setEncoding('utf8');
+    req.on('data', (chunk: string) => chunks.push(chunk));
+    req.on('end', () => resolve(chunks.join('')));
+    req.on('error', (error) =>
+      reject(new Error(`Failed to read request body: ${error instanceof Error ? error.message : String(error)}`)),
+    );
+  });
+  if (!body) return {};
+  return JSON.parse(body) as Record<string, unknown>;
+}
+
+async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: boolean) {
   if (!req.url) {
     res.writeHead(404);
     res.end();
@@ -89,13 +117,9 @@ function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean)
   }
 
   if (req.url === '/health') {
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(
-      JSON.stringify({ status: 'ok', service: 'workflow-engine', timestamp: new Date().toISOString() }),
-    );
+    sendJson(res, 200, { status: 'ok', service: 'workflow-engine', timestamp: new Date().toISOString() });
     return;
   }
-
 
   if (req.url === '/metrics') {
     res.writeHead(200, { 'content-type': 'text/plain; version=0.0.4' });
@@ -108,14 +132,94 @@ function handleHealth(req: IncomingMessage, res: ServerResponse, ready: boolean)
   }
 
   if (req.url === '/ready') {
-    res.writeHead(ready ? 200 : 503, { 'content-type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        status: ready ? 'ok' : 'starting',
-        service: 'workflow-engine',
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    sendJson(res, ready ? 200 : 503, {
+      status: ready ? 'ok' : 'starting',
+      service: 'workflow-engine',
+      timestamp: new Date().toISOString(),
+    });
+    return;
+  }
+
+  if (req.url === '/execute') {
+    if (req.method !== 'POST') {
+      res.writeHead(405, { Allow: 'POST' });
+      res.end();
+      return;
+    }
+
+    try {
+      const body = await readJsonBody(req);
+      const { workflow: workflowData, triggerData } = body;
+
+      if (!workflowData || typeof workflowData !== 'object') {
+        sendJson(res, 400, { error: 'Request body must include a "workflow" object.' });
+        return;
+      }
+
+      const wf = workflowData as Partial<Workflow>;
+      if (typeof wf.name !== 'string' || !wf.name.trim()) {
+        sendJson(res, 400, { error: 'workflow.name must be a non-empty string.' });
+        return;
+      }
+
+      const contextData = triggerData && typeof triggerData === 'object'
+        ? (triggerData as Record<string, unknown>)
+        : {};
+
+      const workflowId = typeof wf.id === 'string' ? wf.id : generateId('wf');
+      const executionId = generateId('exec');
+
+      const workflow: Workflow = {
+        id: workflowId,
+        teamId: (wf.teamId ?? 'demo_team') as string,
+        name: wf.name,
+        description: wf.description,
+        enabled: typeof wf.enabled === 'boolean' ? wf.enabled : true,
+        definition: wf.definition ?? { triggers: [], actions: [] },
+        createdAt: wf.createdAt ? new Date(wf.createdAt as unknown as string) : new Date(),
+      };
+
+      const context: WorkflowContext = {
+        workflowId,
+        triggerId: 'trigger_1',
+        data: contextData as Record<string, any>,
+        executionId,
+        startTime: new Date(),
+      };
+
+      const result = await executor.execute(workflow, context);
+
+      log('info', 'workflow_executed', {
+        workflowId,
+        executionId,
+        success: result.success,
+        duration: result.duration,
+        actionsExecuted: result.actionsExecuted,
+      });
+
+      sendJson(res, result.success ? 200 : 422, { executionId, workflowId, ...result });
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        sendJson(res, 400, { error: 'Invalid JSON body.' });
+        return;
+      }
+      const errorId = createErrorId();
+      log('error', 'execute_unexpected_error', {
+        errorId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      sendJson(res, 500, { error: 'Unexpected error during workflow execution.', errorId });
+    }
+    return;
+  }
+
+  if (req.url === '/history') {
+    if (req.method !== 'GET') {
+      res.writeHead(405, { Allow: 'GET' });
+      res.end();
+      return;
+    }
+    sendJson(res, 200, { history: getExecutionHistory() });
     return;
   }
 
@@ -127,7 +231,20 @@ async function main() {
   const env = loadEnvironment();
   let ready = false;
 
-  const server = createServer((req, res) => handleHealth(req, res, ready));
+  const server = createServer((req, res) => {
+    void handleRequest(req, res, ready).catch((error) => {
+      const errorId = createErrorId();
+      log('error', 'request_handling_failed', {
+        errorId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      if (!res.headersSent) {
+        sendJson(res, 500, { error: 'Unexpected server error.', errorId });
+      } else {
+        res.end();
+      }
+    });
+  });
 
   await new Promise<void>((resolve) => {
     server.listen(env.PORT, '0.0.0.0', () => resolve());
@@ -156,9 +273,11 @@ async function main() {
   process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
-main().catch((error) => {
-  log('error', 'service_start_failed', {
-    error: error instanceof Error ? error.message : String(error),
+if (require.main === module) {
+  main().catch((error) => {
+    log('error', 'service_start_failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    process.exit(1);
   });
-  process.exit(1);
-});
+}
