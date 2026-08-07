@@ -1,7 +1,7 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { IS_PUBLIC_KEY } from './public.decorator';
+import { IS_PUBLIC_KEY, Public } from './public.decorator';
 import { JwtStrategy, JwtPayload } from './jwt.strategy';
 import { ConfigService } from '@nestjs/config';
 
@@ -67,8 +67,16 @@ describe('JwtStrategy', () => {
 });
 
 describe('@Public decorator', () => {
-  it('sets IS_PUBLIC_KEY metadata', () => {
-    const key = IS_PUBLIC_KEY;
-    expect(key).toBe('isPublic');
+  it('sets IS_PUBLIC_KEY metadata to true on a handler', () => {
+    class TestController {
+      @Public()
+      handler() {}
+    }
+    const metadata = Reflect.getMetadata(IS_PUBLIC_KEY, TestController.prototype.handler);
+    expect(metadata).toBe(true);
+  });
+
+  it('IS_PUBLIC_KEY constant is "isPublic"', () => {
+    expect(IS_PUBLIC_KEY).toBe('isPublic');
   });
 });

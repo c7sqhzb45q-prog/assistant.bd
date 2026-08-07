@@ -6,7 +6,6 @@ import {
   HttpCode,
   Post,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RawBodyRequest } from '@nestjs/common';
@@ -17,11 +16,9 @@ import {
   CreateCheckoutSessionDto,
 } from './billing.dto';
 import { Public } from '../auth/public.decorator';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('billing')
 @Controller('billing')
-@UseGuards(JwtAuthGuard)
 export class BillingController {
   constructor(private readonly billing: BillingService) {}
 

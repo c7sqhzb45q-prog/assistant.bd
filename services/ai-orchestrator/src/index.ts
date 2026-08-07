@@ -191,6 +191,10 @@ async function handleOllamaGenerate(req: IncomingMessage, res: ServerResponse, e
 
 function isAuthorizedInternalRequest(req: IncomingMessage, env: Environment): boolean {
   if (!env.INTERNAL_SERVICE_SECRET) {
+    log('info', 'internal_secret_not_configured_skipping_auth', {
+      url: req.url,
+      warning: 'INTERNAL_SERVICE_SECRET is not set; skipping internal auth check',
+    });
     return true;
   }
   const provided = req.headers['x-internal-secret'];
