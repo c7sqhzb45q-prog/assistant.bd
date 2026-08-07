@@ -28,12 +28,18 @@ function resolveServiceUrl(value: string | undefined, defaultUrl: string): strin
 @Injectable()
 export class WorkflowService {
   private readonly engineUrl: string;
+  private readonly internalSecret: string | undefined;
 
   constructor(private readonly config: ConfigService) {
     this.engineUrl = resolveServiceUrl(
       this.config.get<string>('WORKFLOW_ENGINE_URL'),
       'http://localhost:3002',
     );
+    this.internalSecret = this.config.get<string>('INTERNAL_SERVICE_SECRET');
+  }
+
+  private get internalHeaders(): Record<string, string> {
+    return this.internalSecret ? { 'x-internal-secret': this.internalSecret } : {};
   }
 
   async execute(dto: ExecuteWorkflowDto) {
@@ -70,7 +76,7 @@ export class WorkflowService {
       const { data } = await axios.post<ExecutionResponse>(
         `${this.engineUrl}/execute`,
         payload,
-        { timeout: 15_000 },
+        { timeout: 15_000, headers: this.internalHeaders },
       );
       return data;
     } catch (error) {
@@ -96,7 +102,7 @@ export class WorkflowService {
     try {
       const { data } = await axios.get<{ history: WorkflowExecutionRecord[] }>(
         `${this.engineUrl}/history`,
-        { timeout: 5_000 },
+        { timeout: 5_000, headers: this.internalHeaders },
       );
       return data.history;
     } catch (error) {

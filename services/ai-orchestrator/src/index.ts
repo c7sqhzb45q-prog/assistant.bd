@@ -11,6 +11,7 @@ type Environment = {
   REDIS_URL?: string;
   OLLAMA_BASE_URL?: string;
   OLLAMA_MODEL?: string;
+  INTERNAL_SERVICE_SECRET?: string;
 };
 
 export interface OrchestrationRequest {
@@ -87,6 +88,7 @@ function loadEnvironment(): Environment {
     REDIS_URL: process.env.REDIS_URL,
     OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL?.trim(),
     OLLAMA_MODEL: process.env.OLLAMA_MODEL?.trim(),
+    INTERNAL_SERVICE_SECRET: process.env.INTERNAL_SERVICE_SECRET,
   };
 
   const missingInProd: string[] = [];
@@ -94,6 +96,7 @@ function loadEnvironment(): Environment {
     if (!env.OPENAI_API_KEY) missingInProd.push('OPENAI_API_KEY');
     if (!env.DATABASE_URL) missingInProd.push('DATABASE_URL');
     if (!env.REDIS_URL) missingInProd.push('REDIS_URL');
+    if (!env.INTERNAL_SERVICE_SECRET) missingInProd.push('INTERNAL_SERVICE_SECRET');
   }
 
   if (missingInProd.length > 0) {
@@ -186,6 +189,14 @@ async function handleOllamaGenerate(req: IncomingMessage, res: ServerResponse, e
   });
 }
 
+function isAuthorizedInternalRequest(req: IncomingMessage, env: Environment): boolean {
+  if (!env.INTERNAL_SERVICE_SECRET) {
+    return true;
+  }
+  const provided = req.headers['x-internal-secret'];
+  return provided === env.INTERNAL_SERVICE_SECRET;
+}
+
 async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: boolean, env: Environment) {
   if (!req.url) {
     res.writeHead(404);
@@ -220,6 +231,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
     if (req.method !== 'POST') {
       res.writeHead(405, { Allow: 'POST' });
       res.end();
+      return;
+    }
+
+    if (!isAuthorizedInternalRequest(req, env)) {
+      sendJson(res, 401, { error: 'Unauthorized: missing or invalid x-internal-secret header.' });
       return;
     }
 
@@ -265,6 +281,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
     if (req.method !== 'POST') {
       res.writeHead(405, { Allow: 'POST' });
       res.end();
+      return;
+    }
+
+    if (!isAuthorizedInternalRequest(req, env)) {
+      sendJson(res, 401, { error: 'Unauthorized: missing or invalid x-internal-secret header.' });
       return;
     }
 

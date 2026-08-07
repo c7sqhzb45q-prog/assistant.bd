@@ -7,6 +7,7 @@ type Environment = {
   PORT: number;
   DATABASE_URL?: string;
   REDIS_URL?: string;
+  INTERNAL_SERVICE_SECRET?: string;
 };
 
 const executor = new WorkflowExecutor();
@@ -58,12 +59,14 @@ function loadEnvironment(): Environment {
     PORT: port,
     DATABASE_URL: process.env.DATABASE_URL,
     REDIS_URL: process.env.REDIS_URL,
+    INTERNAL_SERVICE_SECRET: process.env.INTERNAL_SERVICE_SECRET,
   };
 
   const missingInProd: string[] = [];
   if (env.NODE_ENV === 'production') {
     if (!env.DATABASE_URL) missingInProd.push('DATABASE_URL');
     if (!env.REDIS_URL) missingInProd.push('REDIS_URL');
+    if (!env.INTERNAL_SERVICE_SECRET) missingInProd.push('INTERNAL_SERVICE_SECRET');
   }
 
   if (missingInProd.length > 0) {
@@ -109,7 +112,15 @@ async function readJsonBody(req: IncomingMessage): Promise<Record<string, unknow
   return JSON.parse(body) as Record<string, unknown>;
 }
 
-async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: boolean) {
+function isAuthorizedInternalRequest(req: IncomingMessage, env: Environment): boolean {
+  if (!env.INTERNAL_SERVICE_SECRET) {
+    return true;
+  }
+  const provided = req.headers['x-internal-secret'];
+  return provided === env.INTERNAL_SERVICE_SECRET;
+}
+
+async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: boolean, env: Environment) {
   if (!req.url) {
     res.writeHead(404);
     res.end();
@@ -144,6 +155,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
     if (req.method !== 'POST') {
       res.writeHead(405, { Allow: 'POST' });
       res.end();
+      return;
+    }
+
+    if (!isAuthorizedInternalRequest(req, env)) {
+      sendJson(res, 401, { error: 'Unauthorized: missing or invalid x-internal-secret header.' });
       return;
     }
 
@@ -219,6 +235,10 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse, ready: b
       res.end();
       return;
     }
+    if (!isAuthorizedInternalRequest(req, env)) {
+      sendJson(res, 401, { error: 'Unauthorized: missing or invalid x-internal-secret header.' });
+      return;
+    }
     sendJson(res, 200, { history: getExecutionHistory() });
     return;
   }
@@ -232,7 +252,7 @@ async function main() {
   let ready = false;
 
   const server = createServer((req, res) => {
-    void handleRequest(req, res, ready).catch((error) => {
+    void handleRequest(req, res, ready, env).catch((error) => {
       const errorId = createErrorId();
       log('error', 'request_handling_failed', {
         errorId,

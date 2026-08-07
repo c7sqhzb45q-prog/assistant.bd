@@ -1,5 +1,6 @@
 import { Controller, Get, Header } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from '../modules/auth/public.decorator';
 
 const payloadSchema = {
   type: 'object',
@@ -13,6 +14,7 @@ const payloadSchema = {
 
 @Controller('health')
 @ApiTags('health')
+@Public()
 export class HealthController {
   @Get()
   @ApiOkResponse({ schema: payloadSchema })
