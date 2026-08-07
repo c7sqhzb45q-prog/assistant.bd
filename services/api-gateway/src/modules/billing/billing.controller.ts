@@ -15,6 +15,7 @@ import {
   CreateBillingPortalSessionDto,
   CreateCheckoutSessionDto,
 } from './billing.dto';
+import { Public } from '../auth/public.decorator';
 
 @ApiTags('billing')
 @Controller('billing')
@@ -22,6 +23,7 @@ export class BillingController {
   constructor(private readonly billing: BillingService) {}
 
   @Get('plans')
+  @Public()
   @ApiOkResponse({ description: 'Returns assistant.bd subscription plans.' })
   getPlans() {
     return this.billing.getPlans();
@@ -40,6 +42,7 @@ export class BillingController {
   }
 
   @Post('webhook')
+  @Public()
   @HttpCode(200)
   @ApiOkResponse({ description: 'Receives and verifies Stripe webhook events.' })
   handleWebhook(

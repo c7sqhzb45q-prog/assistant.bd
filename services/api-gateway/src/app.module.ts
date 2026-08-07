@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { AgentModule } from './modules/agent/agent.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
@@ -32,6 +34,11 @@ import { HealthController } from './controllers/health.controller';
           then: Joi.string().min(32).required(),
           otherwise: Joi.string().min(16).required(),
         }),
+        INTERNAL_SERVICE_SECRET: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().min(32).required(),
+          otherwise: Joi.string().min(16).optional(),
+        }),
         FRONTEND_URL: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
         CORS_ORIGIN: Joi.string().optional(),
         FIRECRAWL_API_KEY: Joi.string().trim().optional(),
@@ -56,5 +63,11 @@ import { HealthController } from './controllers/health.controller';
     FirecrawlModule,
   ],
   controllers: [HealthController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
